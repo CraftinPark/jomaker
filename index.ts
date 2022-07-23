@@ -3,10 +3,10 @@ import { sampleList } from "./sample";
 export type sex = "male" | "female";
 
 export type member = {
-    name: string;
-    year: number;
-    sex: sex;
-    leader: boolean;
+   name: string;
+   year: number;
+   sex: sex;
+   leader: boolean;
 };
 
 // score system. minimize score.
@@ -25,58 +25,97 @@ export type member = {
 let list: member[] = sampleList;
 
 function createJos(n: number, list: member[]) {
-    // split list into n groups as evenly as possible.
+   // split list into n groups as evenly as possible.
 
-    // initialize jos.
-    let jos: member[][] = [];
-    for (let i = 0; i < n; i++) jos.push([]);
+   // initialize jos.
+   let jos: member[][] = [];
+   for (let i = 0; i < n; i++) jos.push([]);
 
-    // sequentially assign members in list to jos in non-optimal order.
-    let joToJoin: number = 0;
-    for (let i = 0; i < list.length; i++) {
-        jos[joToJoin].push(list[i]);
-        if (joToJoin + 1 !== n) joToJoin++;
-        else joToJoin = 0;
-    }
-    console.log(jos);
-    calculateTotalScore(jos);
+   // we now have n empty jos
+
+   let unaddedMembers: member[] = list;
+   shuffleMembers(unaddedMembers);
+
+   while (unaddedMembers.length > 0) {
+      for (let j = 0; j < jos.length; j++) {
+         // have your first choice, jo #j...
+         // lets see if you deserve having your first choice at the end...
+         let smallestScoringIndex: number = 0;
+         let smallestScore: number = 1000000000;
+         for (let i = 0; i < unaddedMembers.length; i++) {
+            let mockJo: member[] = [...jos[j]];
+            mockJo.push(unaddedMembers[i]);
+            let mockScore: number = calculateJoScore(mockJo);
+            if (mockScore < smallestScore) {
+               smallestScoringIndex = i;
+               smallestScore = mockScore;
+            }
+         }
+
+         if (unaddedMembers.length > 0) {
+            jos[j].push(unaddedMembers[smallestScoringIndex]);
+            unaddedMembers.splice(smallestScoringIndex, 1);
+         }
+      }
+   }
+
+   console.log(jos);
+   let totalScore: number = calculateTotalScore(jos);
+   console.log(totalScore);
 }
 
-function calculateTotalScore(jos: member[][]) {
-    let sum: number = 0;
-    for (let i = 0; i < jos.length; i++) {
-        console.log("calculating score for jo #" + i);
-        sum += calculateJoScore(jos[i]);
-    }
+function shuffleMembers(members: member[]): void {
+   for (let i = members.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [members[i], members[j]] = [members[j], members[i]];
+   }
+}
+
+// ############################################################################
+// SCORING SYSTEM
+// - age score: a point for each member with same year as another member in jo
+// - sex score: the difference in # of males to # of females in jo
+// ############################################################################
+
+function calculateTotalScore(jos: member[][]): number {
+   let sum: number = 0;
+   for (let i = 0; i < jos.length; i++) {
+      console.log("calculating score for jo #" + i);
+      sum += calculateJoScore(jos[i]);
+   }
+   return sum;
 }
 
 function calculateJoScore(jo: member[]): number {
-    let score: number = 0;
-    score += ageScore(jo);
-    score += sexScore(jo);
-
-    return score;
+   let score: number = 0;
+   score += ageScore(jo);
+   score += sexScore(jo);
+   console.log(score);
+   return score;
 }
 
 function ageScore(jo: member[]): number {
-    let score: number = 0;
-    for (let i = 0; i < jo.length - 1; i++) {
-        for (let j = i + 1; j < jo.length; j++) {
-            if (jo[i].year === jo[j].year) score++;
-        }
-    }
-    console.log("age score is " + score);
-    return score;
-}
-function sexScore(jo: member[]): number {
-    let score: number = 0;
-    for (let i = 0; i < jo.length - 1; i++) {
-        for (let j = i + 1; j < jo.length; j++) {
-            if (jo[i].sex === jo[j].sex) score++;
-        }
-    }
-    console.log("sex score is " + score);
-    return score;
+   let score: number = 0;
+   for (let i = 0; i < jo.length - 1; i++) {
+      for (let j = i + 1; j < jo.length; j++) {
+         if (jo[i].year === jo[j].year) score++;
+      }
+   }
+   console.log("age score is " + score);
+   return score;
 }
 
-createJos(3, list);
+function sexScore(jo: member[]): number {
+   let score: number = 0;
+   let numMale: number = 0;
+   let numFemale: number = 0;
+   for (let i = 0; i < jo.length; i++) {
+      if (jo[i].sex === "male") numMale++;
+      else if (jo[i].sex === "female") numFemale++;
+   }
+   score = Math.abs(numMale - numFemale);
+   console.log("sex score is " + score);
+   return score;
+}
+
+createJos(5, list);
