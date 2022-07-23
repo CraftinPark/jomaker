@@ -1,3 +1,4 @@
+const util = require("util");
 import { sampleList } from "./sample";
 
 export type sex = "male" | "female";
@@ -18,6 +19,8 @@ export type member = {
 // having more than a single leader in a group is a 2 point deduction.
 // REPETITION:
 // add point for each similar member from a previous grouping.
+// EQUAL NUMBERS:
+// 3 points for each group member
 // point multiplier decays as previoius grouping is from longer ago. (e.g. the same grouping from 20 groupings ago will not add much score)
 
 // create an algorithm that minimizes this score.
@@ -25,43 +28,88 @@ export type member = {
 let list: member[] = sampleList;
 
 function createJos(n: number, list: member[]) {
-   // split list into n groups as evenly as possible.
-
-   // initialize jos.
    let jos: member[][] = [];
    for (let i = 0; i < n; i++) jos.push([]);
-
-   // we now have n empty jos
 
    let unaddedMembers: member[] = list;
    shuffleMembers(unaddedMembers);
 
    while (unaddedMembers.length > 0) {
-      for (let j = 0; j < jos.length; j++) {
-         // have your first choice, jo #j...
-         // lets see if you deserve having your first choice at the end...
-         let smallestScoringIndex: number = 0;
-         let smallestScore: number = 1000000000;
-         for (let i = 0; i < unaddedMembers.length; i++) {
-            let mockJo: member[] = [...jos[j]];
-            mockJo.push(unaddedMembers[i]);
-            let mockScore: number = calculateJoScore(mockJo);
-            if (mockScore < smallestScore) {
-               smallestScoringIndex = i;
-               smallestScore = mockScore;
-            }
-         }
+      // for (let i = 0; i < 5; i++) {
+      optimallyAddMemberToJos(jos, unaddedMembers);
+      console.log("///////////////////////////// new jos:");
+      console.log(jos);
+      console.log("///////////////////////////// new unaddedmembers: ");
+      console.log(unaddedMembers);
+   }
 
-         if (unaddedMembers.length > 0) {
-            jos[j].push(unaddedMembers[smallestScoringIndex]);
-            unaddedMembers.splice(smallestScoringIndex, 1);
+   // console.log(jos);
+   // let totalScore: number = calculateTotalScore(jos);
+   // console.log(totalScore);
+}
+
+function optimallyAddMemberToJos(jos: member[][], unaddedMembers: member[]): void {
+   let mockPossibilities: member[][][] = [];
+   for (let h = 0; h < jos.length; h++) {
+      let mockPossibility: member[][] = [];
+      for (let i = 0; i < jos.length; i++) mockPossibility.push([...jos[i]]);
+      mockPossibilities.push(mockPossibility);
+   }
+
+   let possibleUnaddedMembers: member[][] = [];
+   for (let i = 0; i < jos.length; i++) possibleUnaddedMembers.push([...unaddedMembers]);
+
+   for (let i = 0; i < mockPossibilities.length; i++) {
+      // let mockJos: member[][] = [];
+      // for (let j = 0; j < mockPossibilities[i].length; j++) {
+      //    mockJos.push([...mockPossibilities[i][j]]);
+      // }
+      let mockJos = mockPossibilities[i];
+      let mockUnaddedMembers: member[] = possibleUnaddedMembers[i];
+      let bestChoiceIndex = findJoBestChoice(mockJos, i, mockUnaddedMembers);
+      if (mockUnaddedMembers.length > 0) {
+         mockJos[i].push(mockUnaddedMembers[bestChoiceIndex]);
+         mockUnaddedMembers.splice(bestChoiceIndex, 1);
+
+         if (mockJos.length > 1) {
+            let thisJo = [...mockJos[i]];
+            mockJos.splice(i, 1);
+            optimallyAddMemberToJos(mockJos, mockUnaddedMembers);
+            mockJos.splice(i, 0, thisJo);
          }
       }
    }
 
-   console.log(jos);
-   let totalScore: number = calculateTotalScore(jos);
-   console.log(totalScore);
+   // console.log("mock possibility:");
+   // console.log(util.inspect(mockPossibilities[0], { showHidden: false, depth: null, colors: true }));
+
+   let mockScores = mockPossibilities.map((mockJo) => {
+      return calculateTotalScore(mockJo);
+   });
+   let smallestTotalScore = Math.min(...mockScores);
+   let optimalJoToGiveFirstChoice = mockScores.indexOf(smallestTotalScore);
+   // console.log("give first choice to " + optimalJoToGiveFirstChoice);
+   Object.assign(jos, mockPossibilities[optimalJoToGiveFirstChoice], {
+      length: mockPossibilities[optimalJoToGiveFirstChoice].length,
+   });
+   Object.assign(unaddedMembers, possibleUnaddedMembers[optimalJoToGiveFirstChoice], {
+      length: possibleUnaddedMembers[optimalJoToGiveFirstChoice].length,
+   });
+}
+
+function findJoBestChoice(jos: member[][], j: number, unaddedMembers: member[]): number {
+   let smallestScoringIndex: number = 0;
+   let smallestScore: number = 1000000000;
+   for (let i = 0; i < unaddedMembers.length; i++) {
+      let mockJo: member[] = [...jos[j]];
+      mockJo.push(unaddedMembers[i]);
+      let mockScore: number = calculateJoScore(mockJo);
+      if (mockScore < smallestScore) {
+         smallestScoringIndex = i;
+         smallestScore = mockScore;
+      }
+   }
+   return smallestScoringIndex;
 }
 
 function shuffleMembers(members: member[]): void {
@@ -80,7 +128,7 @@ function shuffleMembers(members: member[]): void {
 function calculateTotalScore(jos: member[][]): number {
    let sum: number = 0;
    for (let i = 0; i < jos.length; i++) {
-      console.log("calculating score for jo #" + i);
+      // console.log("calculating score for jo #" + i);
       sum += calculateJoScore(jos[i]);
    }
    return sum;
@@ -90,7 +138,7 @@ function calculateJoScore(jo: member[]): number {
    let score: number = 0;
    score += ageScore(jo);
    score += sexScore(jo);
-   console.log(score);
+   // console.log(score);
    return score;
 }
 
@@ -101,11 +149,12 @@ function ageScore(jo: member[]): number {
          if (jo[i].year === jo[j].year) score++;
       }
    }
-   console.log("age score is " + score);
+   // console.log("age score is " + score);
    return score;
 }
 
 function sexScore(jo: member[]): number {
+   if (jo.length <= 1) return 0;
    let score: number = 0;
    let numMale: number = 0;
    let numFemale: number = 0;
@@ -114,8 +163,8 @@ function sexScore(jo: member[]): number {
       else if (jo[i].sex === "female") numFemale++;
    }
    score = Math.abs(numMale - numFemale);
-   console.log("sex score is " + score);
+   // console.log("sex score is " + score);
    return score;
 }
 
-createJos(5, list);
+createJos(3, list);
