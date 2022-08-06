@@ -1,6 +1,3 @@
-const util = require("util");
-import { sampleList, smallList, worstCase } from "./sample";
-
 export type sex = "male" | "female";
 
 export type member = {
@@ -10,13 +7,9 @@ export type member = {
    leader: boolean;
 };
 
-let list: member[] = [...sampleList];
-
 export function createDiversifiedJos(n: number, list: member[]) {
    let jos: member[][] = turntableAssign(n, list);
    // console.log("start");
-   console.log(jos);
-   console.log(calculateTotalScore(jos));
    // await continuePrompt();
 
    for (let i = 0; i < jos.length; i++) {
@@ -70,13 +63,10 @@ export function createDiversifiedJos(n: number, list: member[]) {
       }
    }
 
-   console.log(jos);
-   console.log(calculateTotalScore(jos));
-
-   return calculateTotalScore(jos);
+   return jos;
 }
 
-function turntableAssign(n: number, list: member[]) {
+export function turntableAssign(n: number, list: member[]) {
    // form arbitrarily formed groups (in given order);
    let jos: member[][] = [];
    for (let i = 0; i < n; i++) jos.push([]);
@@ -105,7 +95,7 @@ function swap(first: number[], second: number[], jos: member[][]) {
    }
 }
 
-function shuffleMembers(members: member[]): void {
+export function shuffleMembers(members: member[]): void {
    for (let i = members.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [members[i], members[j]] = [members[j], members[i]];
@@ -119,7 +109,7 @@ function shuffleMembers(members: member[]): void {
 // - leader score: a point for each leader in a group (that is not the first leader)
 // ############################################################################
 
-function calculateTotalScore(jos: member[][]): number {
+export function calculateTotalScore(jos: member[][]): number {
    let sum: number = 0;
    for (let i = 0; i < jos.length; i++) {
       // console.log("calculating score for jo #" + i);
@@ -168,44 +158,5 @@ function leaderScore(jo: member[]): number {
       if (jo[i].leader === true) numLeaders++;
    }
    if (numLeaders > 0) return numLeaders - 1;
-   else return 0;
+   else return 1;
 }
-
-const readline = require("readline");
-function continuePrompt() {
-   const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout,
-   });
-
-   return new Promise((resolve) =>
-      rl.question("enter to continue", (ans: any) => {
-         rl.close();
-         resolve(ans);
-      })
-   );
-}
-
-async function run(n: number) {
-   for (let i = 0; i < n; i++) {
-      let list = [...sampleList];
-      shuffleMembers(list);
-      createDiversifiedJos(3, list);
-      await continuePrompt();
-   }
-}
-
-function bruteList(n: number) {
-   let scores = [];
-   for (let i = 0; i < n; i++) {
-      let list = [...sampleList];
-      shuffleMembers(list);
-      scores.push(createDiversifiedJos(3, list));
-   }
-   console.dir(scores, { maxArrayLength: null });
-}
-
-// run(100);
-bruteList(500);
-// shuffleMembers(list);
-// createJos(3, list);
