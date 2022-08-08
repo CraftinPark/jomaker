@@ -33,6 +33,23 @@ function App() {
 
    const [numJos, setNumJos] = useState<number>(3);
    const [useAlgorithm, setUseAlgorithm] = useState<boolean>(true);
+   const [inclusionList, setInclusionList] = useState<string>((): string => {
+      const localData = localStorage.getItem("inclusionList");
+      return localData ? localData : "";
+   });
+
+   useEffect(() => {
+      localStorage.setItem("inclusionList", inclusionList);
+   }, [inclusionList]);
+
+   const [exclusionList, setExclusionList] = useState<string>((): string => {
+      const localData = localStorage.getItem("exclusionList");
+      return localData ? localData : "";
+   });
+
+   useEffect(() => {
+      localStorage.setItem("exclusionList", exclusionList);
+   }, [exclusionList]);
 
    const [jos, setJos] = useState<member[][]>([]);
 
@@ -162,15 +179,29 @@ function App() {
       setMembers((current) => [...current, { name: name, sex: sex, year: year, leader: leader }]);
    }
 
+   function parseList(list: string) {
+      let inclist = list;
+      let incs = inclist.split(/\,\s?(?![^\(]*\))/);
+      incs.forEach((inc, idx) => (incs[idx] = inc.substring(1, inc.length - 1)));
+      let is: string[][] = [];
+      for (let i = 0; i < incs.length; i++) {
+         is.push([]);
+         is[i] = incs[i].split(",");
+         is[i].forEach((x, idx) => (is[i][idx] = x.trim()));
+      }
+      return is;
+   }
+
    function createJos() {
       let mems = [...members];
       shuffleMembers(mems);
-      let jos = [];
-      if (useAlgorithm) jos = createDiversifiedJos(numJos, mems);
-      else jos = turntableAssign(numJos, mems);
+      let incList = parseList(inclusionList);
+      let excList = parseList(exclusionList);
 
+      let jos: member[][] = [];
+      if (useAlgorithm) jos = createDiversifiedJos(numJos, mems, incList, excList);
+      else jos = turntableAssign(numJos, mems);
       setJos(jos);
-      console.log(calculateTotalScore(jos));
    }
 
    function renderJos() {
@@ -249,10 +280,35 @@ function App() {
                      value={useAlgorithm}
                      onChange={(e: any) => setUseAlgorithm(e.target.checked)}
                   />
-                  <Typography variant="subtitle1">
-                     Exclusion List: surround each exclusion group with parantheses, separated by comma
+                  <Typography variant="subtitle1">Inclusion List: Members that must be grouped together</Typography>
+                  <TextField
+                     placeholder="surround each inclusion group with parantheses, separated by commas"
+                     fullWidth
+                     multiline
+                     rows={1}
+                     value={inclusionList}
+                     onChange={(e: any) => setInclusionList(e.target.value)}
+                  />
+                  <Typography display="inline" variant="subtitle2">
+                     In order of importance (WIP)
                   </Typography>
-                  <TextField placeholder="Members that cannot be grouped together" fullWidth multiline rows={1} />
+                  <Switch disabled/>
+                  <Typography sx={{ mt: 1 }} variant="subtitle1">
+                     Exclusion List: Members that cannot be grouped together
+                  </Typography>
+                  <TextField
+                     placeholder="surround each exclusion group with parantheses, separated by commas"
+                     fullWidth
+                     multiline
+                     rows={1}
+                     value={exclusionList}
+                     onChange={(e: any) => setExclusionList(e.target.value)}
+                  />
+                  <Typography display="inline" variant="subtitle2">
+                     In order of importance (WIP)
+                  </Typography>
+                  <Switch disabled/>
+                  <div></div>
                   <Button sx={{ mt: 1 }} variant="contained" onClick={() => createJos()}>
                      Create Jos
                   </Button>

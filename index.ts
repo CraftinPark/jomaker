@@ -1,5 +1,4 @@
-const util = require("util");
-import { sampleList, smallList, worstCase } from "./sample";
+import { sampleList } from "./sample";
 
 export type sex = "male" | "female";
 
@@ -10,23 +9,19 @@ export type member = {
    leader: boolean;
 };
 
-let list: member[] = [...sampleList];
-
-export function createDiversifiedJos(n: number, list: member[]) {
+export function createDiversifiedJos(n: number, list: member[], inclusionList: string[][], exclusionList: string[][]) {
    let jos: member[][] = turntableAssign(n, list);
-   // console.log("start");
-   console.log(jos);
-   console.log(calculateTotalScore(jos));
+   //    console.log("start");
    // await continuePrompt();
 
    for (let i = 0; i < jos.length; i++) {
       for (let j = 0; j < jos[i].length; j++) {
-         let startScore: number = calculateTotalScore(jos);
+         let startScore: number = calculateTotalScore(jos, inclusionList, exclusionList);
 
-         // console.log("start swaps for new element");
-         // console.log("indices: ", i, j);
-         // console.log(jos);
-         // console.log(calculateTotalScore(jos));
+         //  console.log("start swaps for new element");
+         //  console.log("indices: ", i, j);
+         //  console.log(JSON.stringify(jos, null, 4));
+         //  console.log(calculateTotalScore(jos, inclusionList, exclusionList));
          // await continuePrompt();
 
          // greedily swap for improvement in score.
@@ -38,25 +33,25 @@ export function createDiversifiedJos(n: number, list: member[]) {
             for (let l = 0; l < jos[i].length; l++) {
                if (k === i && l === j) continue;
 
-               // console.log("swap with");
-               // console.log("indices: ", k, l);
+               //    console.log("swap with");
+               //    console.log("indices: ", k, l);
 
                swap([i, j], [k, l], jos);
 
-               // console.log(jos);
-               // console.log(calculateTotalScore(jos));
+               //    console.log(JSON.stringify(jos, null, 4));
+               //    console.log(calculateTotalScore(jos, inclusionList, exclusionList));
 
-               let swappedScore: number = calculateTotalScore(jos);
+               let swappedScore: number = calculateTotalScore(jos, inclusionList, exclusionList);
                swap([i, j], [k, l], jos);
-               // console.log("swap back");
-               // console.log(jos);
+               //    console.log("swap back");
+               //    console.log(JSON.stringify(jos, null, 4));
 
                if (swappedScore < bestSwappedScore) {
                   bestSwappedScore = swappedScore;
                   bestSwappedMember = [k, l];
-                  // console.log("NEW BEST SCORE!");
+                  //   console.log("NEW BEST SCORE!");
                }
-               // console.log("current best score: ", bestSwappedScore);
+               //    console.log("current best score: ", bestSwappedScore);
                // await continuePrompt();
             }
          }
@@ -70,13 +65,10 @@ export function createDiversifiedJos(n: number, list: member[]) {
       }
    }
 
-   console.log(jos);
-   console.log(calculateTotalScore(jos));
-
-   return calculateTotalScore(jos);
+   return jos;
 }
 
-function turntableAssign(n: number, list: member[]) {
+export function turntableAssign(n: number, list: member[]) {
    // form arbitrarily formed groups (in given order);
    let jos: member[][] = [];
    for (let i = 0; i < n; i++) jos.push([]);
@@ -105,7 +97,7 @@ function swap(first: number[], second: number[], jos: member[][]) {
    }
 }
 
-function shuffleMembers(members: member[]): void {
+export function shuffleMembers(members: member[]): void {
    for (let i = members.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [members[i], members[j]] = [members[j], members[i]];
@@ -117,22 +109,26 @@ function shuffleMembers(members: member[]): void {
 // - age score: a point for each member with same year as another member in jo
 // - sex score: the difference in # of males to # of females in jo (unless only 1 member)
 // - leader score: a point for each leader in a group (that is not the first leader)
+// - inclusion list: if member in inclusion list is not included in jo, 100 points
+// - exclusion list: if member is in the same jo as another member in exclusion list, 100 points
 // ############################################################################
 
-function calculateTotalScore(jos: member[][]): number {
+export function calculateTotalScore(jos: member[][], inclusionList: string[][], exclusionList: string[][]): number {
    let sum: number = 0;
    for (let i = 0; i < jos.length; i++) {
       // console.log("calculating score for jo #" + i);
-      sum += calculateJoScore(jos[i]);
+      sum += calculateJoScore(jos[i], inclusionList, exclusionList);
    }
    return sum;
 }
 
-function calculateJoScore(jo: member[]): number {
+function calculateJoScore(jo: member[], inclusionList: string[][], exclusionList: string[][]): number {
    let score: number = 0;
    score += ageScore(jo);
    score += sexScore(jo);
    score += leaderScore(jo);
+   score += inclusionScore(jo, inclusionList);
+   score += exclusionScore(jo, exclusionList);
    // console.log(score);
    return score;
 }
@@ -167,45 +163,66 @@ function leaderScore(jo: member[]): number {
    for (let i = 0; i < jo.length; i++) {
       if (jo[i].leader === true) numLeaders++;
    }
-   if (numLeaders > 0) return numLeaders - 1;
-   else return 0;
+   if (numLeaders > 0) return (numLeaders - 1) * 3;
+   else return 3;
 }
 
-const readline = require("readline");
-function continuePrompt() {
-   const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout,
-   });
+// sample inclusionList:
+// [[ "John", "Christina" ],
+// [ "Daniel", "Elliot" ]]
 
-   return new Promise((resolve) =>
-      rl.question("enter to continue", (ans: any) => {
-         rl.close();
-         resolve(ans);
-      })
-   );
-}
+function inclusionScore(jo: member[], inclusionList: string[][]): number {
+   // check each member in jo for whether they are in the inclusion list.
+   // for each occurence, confirm the inclusion members are in the list.
+   // if not, add 100 points
+   let score: number = 0;
 
-async function run(n: number) {
-   for (let i = 0; i < n; i++) {
-      let list = [...sampleList];
-      shuffleMembers(list);
-      createDiversifiedJos(3, list);
-      await continuePrompt();
+   for (let i = 0; i < inclusionList.length; i++) {
+      for (let j = 0; j < inclusionList[i].length; j++) {
+         if (jo.filter((m) => m.name === inclusionList[i][j]).length > 0) {
+            // confirm every member in inclusionList[i] is in jo.
+            for (let k = 0; k < inclusionList[i].length; k++) {
+               if (k === j) continue;
+               if (jo.filter((m) => m.name === inclusionList[i][k]).length === 0) score += 100;
+            }
+         }
+      }
    }
+   return score;
 }
 
-function bruteList(n: number) {
-   let scores = [];
-   for (let i = 0; i < n; i++) {
-      let list = [...sampleList];
-      shuffleMembers(list);
-      scores.push(createDiversifiedJos(3, list));
+function exclusionScore(jo: member[], inclusionList: string[][]): number {
+   // check each member in jo for whether they are in the inclusion list.
+   // for each occurence, confirm the inclusion members are not in the list.
+   // if they are, add 100 points
+   let score: number = 0;
+
+   for (let i = 0; i < inclusionList.length; i++) {
+      for (let j = 0; j < inclusionList[i].length; j++) {
+         if (jo.filter((m) => m.name === inclusionList[i][j]).length > 0) {
+            // confirm every member in inclusionList[i] is NOT in jo.
+            for (let k = 0; k < inclusionList[i].length; k++) {
+               if (k === j) continue;
+               if (jo.filter((m) => m.name === inclusionList[i][k]).length > 0) score += 100;
+            }
+         }
+      }
    }
-   console.dir(scores, { maxArrayLength: null });
+   return score;
 }
 
-// run(100);
-bruteList(500);
-// shuffleMembers(list);
-// createJos(3, list);
+let list = sampleList;
+shuffleMembers(list);
+let jos = createDiversifiedJos(3, list, [["John", "Christina", "Daniel", "Danny", "Christian"]], [["Elliot", "Jueun"]]);
+console.log(jos);
+console.log(calculateTotalScore(jos, [["John", "Christina", "Daniel"]], [["Elliot", "Jueun"]]));
+
+// let jo: member[] = [
+//    { name: "Gansanim", year: 1995, sex: "female", leader: true },
+//    { name: "Peter", year: 2001, sex: "male", leader: true },
+//    { name: "Lucy", year: 2000, sex: "female", leader: false },
+//    { name: "Christina", year: 2002, sex: "female", leader: false },
+//    { name: "John", year: 2001, sex: "male", leader: false },
+// ];
+
+// console.log(calculateJoScore(jo, [["Danny", "Christian"]], [["Christina", "John"]]));

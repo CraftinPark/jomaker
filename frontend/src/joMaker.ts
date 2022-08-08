@@ -7,19 +7,19 @@ export type member = {
    leader: boolean;
 };
 
-export function createDiversifiedJos(n: number, list: member[]) {
+export function createDiversifiedJos(n: number, list: member[], inclusionList: string[][], exclusionList: string[][]) {
    let jos: member[][] = turntableAssign(n, list);
-   // console.log("start");
+   //    console.log("start");
    // await continuePrompt();
 
    for (let i = 0; i < jos.length; i++) {
       for (let j = 0; j < jos[i].length; j++) {
-         let startScore: number = calculateTotalScore(jos);
+         let startScore: number = calculateTotalScore(jos, inclusionList, exclusionList);
 
-         // console.log("start swaps for new element");
-         // console.log("indices: ", i, j);
-         // console.log(jos);
-         // console.log(calculateTotalScore(jos));
+         //  console.log("start swaps for new element");
+         //  console.log("indices: ", i, j);
+         //  console.log(JSON.stringify(jos, null, 4));
+         //  console.log(calculateTotalScore(jos, inclusionList, exclusionList));
          // await continuePrompt();
 
          // greedily swap for improvement in score.
@@ -31,25 +31,25 @@ export function createDiversifiedJos(n: number, list: member[]) {
             for (let l = 0; l < jos[i].length; l++) {
                if (k === i && l === j) continue;
 
-               // console.log("swap with");
-               // console.log("indices: ", k, l);
+               //    console.log("swap with");
+               //    console.log("indices: ", k, l);
 
                swap([i, j], [k, l], jos);
 
-               // console.log(jos);
-               // console.log(calculateTotalScore(jos));
+               //    console.log(JSON.stringify(jos, null, 4));
+               //    console.log(calculateTotalScore(jos, inclusionList, exclusionList));
 
-               let swappedScore: number = calculateTotalScore(jos);
+               let swappedScore: number = calculateTotalScore(jos, inclusionList, exclusionList);
                swap([i, j], [k, l], jos);
-               // console.log("swap back");
-               // console.log(jos);
+               //    console.log("swap back");
+               //    console.log(JSON.stringify(jos, null, 4));
 
                if (swappedScore < bestSwappedScore) {
                   bestSwappedScore = swappedScore;
                   bestSwappedMember = [k, l];
-                  // console.log("NEW BEST SCORE!");
+                  //   console.log("NEW BEST SCORE!");
                }
-               // console.log("current best score: ", bestSwappedScore);
+               //    console.log("current best score: ", bestSwappedScore);
                // await continuePrompt();
             }
          }
@@ -107,22 +107,26 @@ export function shuffleMembers(members: member[]): void {
 // - age score: a point for each member with same year as another member in jo
 // - sex score: the difference in # of males to # of females in jo (unless only 1 member)
 // - leader score: a point for each leader in a group (that is not the first leader)
+// - inclusion list: if member in inclusion list is not included in jo, 100 points
+// - exclusion list: if member is in the same jo as another member in exclusion list, 100 points
 // ############################################################################
 
-export function calculateTotalScore(jos: member[][]): number {
+export function calculateTotalScore(jos: member[][], inclusionList: string[][], exclusionList: string[][]): number {
    let sum: number = 0;
    for (let i = 0; i < jos.length; i++) {
       // console.log("calculating score for jo #" + i);
-      sum += calculateJoScore(jos[i]);
+      sum += calculateJoScore(jos[i], inclusionList, exclusionList);
    }
    return sum;
 }
 
-function calculateJoScore(jo: member[]): number {
+function calculateJoScore(jo: member[], inclusionList: string[][], exclusionList: string[][]): number {
    let score: number = 0;
    score += ageScore(jo);
    score += sexScore(jo);
    score += leaderScore(jo);
+   score += inclusionScore(jo, inclusionList);
+   score += exclusionScore(jo, exclusionList);
    // console.log(score);
    return score;
 }
@@ -157,6 +161,50 @@ function leaderScore(jo: member[]): number {
    for (let i = 0; i < jo.length; i++) {
       if (jo[i].leader === true) numLeaders++;
    }
-   if (numLeaders > 0) return numLeaders - 1;
-   else return 1;
+   if (numLeaders > 0) return (numLeaders - 1) * 3;
+   else return 3;
+}
+
+// sample inclusionList:
+// [[ "John", "Christina" ],
+// [ "Daniel", "Elliot" ]]
+
+function inclusionScore(jo: member[], inclusionList: string[][]): number {
+   // check each member in jo for whether they are in the inclusion list.
+   // for each occurence, confirm the inclusion members are in the list.
+   // if not, add 100 points
+   let score: number = 0;
+
+   for (let i = 0; i < inclusionList.length; i++) {
+      for (let j = 0; j < inclusionList[i].length; j++) {
+         if (jo.filter((m) => m.name === inclusionList[i][j]).length > 0) {
+            // confirm every member in inclusionList[i] is in jo.
+            for (let k = 0; k < inclusionList[i].length; k++) {
+               if (k === j) continue;
+               if (jo.filter((m) => m.name === inclusionList[i][k]).length === 0) score += 100;
+            }
+         }
+      }
+   }
+   return score;
+}
+
+function exclusionScore(jo: member[], inclusionList: string[][]): number {
+   // check each member in jo for whether they are in the inclusion list.
+   // for each occurence, confirm the inclusion members are not in the list.
+   // if they are, add 100 points
+   let score: number = 0;
+
+   for (let i = 0; i < inclusionList.length; i++) {
+      for (let j = 0; j < inclusionList[i].length; j++) {
+         if (jo.filter((m) => m.name === inclusionList[i][j]).length > 0) {
+            // confirm every member in inclusionList[i] is NOT in jo.
+            for (let k = 0; k < inclusionList[i].length; k++) {
+               if (k === j) continue;
+               if (jo.filter((m) => m.name === inclusionList[i][k]).length > 0) score += 100;
+            }
+         }
+      }
+   }
+   return score;
 }
