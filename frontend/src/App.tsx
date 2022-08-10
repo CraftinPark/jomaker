@@ -2,6 +2,7 @@ import {
    AppBar,
    Box,
    Button,
+   FormControlLabel,
    Grid,
    MenuItem,
    Paper,
@@ -13,8 +14,9 @@ import {
    Typography,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import { isJSDocNamepathType } from "typescript";
 import { member, sex, createDiversifiedJos, shuffleMembers, turntableAssign, calculateTotalScore } from "./joMaker";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { v4 as uuidv4 } from "uuid";
 
 function App() {
    const [members, setMembers] = useState<member[]>(() => {
@@ -33,6 +35,7 @@ function App() {
 
    const [numJos, setNumJos] = useState<number>(3);
    const [useAlgorithm, setUseAlgorithm] = useState<boolean>(true);
+
    const [inclusionList, setInclusionList] = useState<string>((): string => {
       const localData = localStorage.getItem("inclusionList");
       return localData ? localData : "";
@@ -52,6 +55,12 @@ function App() {
    }, [exclusionList]);
 
    const [jos, setJos] = useState<member[][]>([]);
+
+   useEffect(() => {
+      console.log(jos);
+   }, [jos]);
+
+   const [showProperties, setShowProperties] = useState<boolean>(false);
 
    function renderMembers() {
       let tableStyle = {
@@ -176,7 +185,7 @@ function App() {
 
    function addMember() {
       if (!name || !sex || !year || leader === undefined) return;
-      setMembers((current) => [...current, { name: name, sex: sex, year: year, leader: leader }]);
+      setMembers((current) => [...current, { id: uuidv4(), name: name, sex: sex, year: year, leader: leader }]);
    }
 
    function parseList(list: string) {
@@ -197,46 +206,206 @@ function App() {
       shuffleMembers(mems);
       let incList = parseList(inclusionList);
       let excList = parseList(exclusionList);
-
       let jos: member[][] = [];
       if (useAlgorithm) jos = createDiversifiedJos(numJos, mems, incList, excList);
       else jos = turntableAssign(numJos, mems);
       setJos(jos);
+      console.log(calculateTotalScore(jos, incList, excList));
    }
+
+   const reorder = (list: any, startIndex: any, endIndex: any): member[] => {
+      const result: member[] = Array.from(list);
+      const [removed] = result.splice(startIndex, 1);
+      result.splice(endIndex, 0, removed);
+
+      return result;
+   };
+
+   const move = (source: member[], destination: member[], droppableSource: any, droppableDestination: any) => {
+      const sourceClone = Array.from(source);
+      const destClone = Array.from(destination);
+      const [removed] = sourceClone.splice(droppableSource.index, 1);
+
+      destClone.splice(droppableDestination.index, 0, removed);
+
+      const result: member[][] = [...jos];
+      console.log("id");
+      console.log(droppableSource.droppableId, droppableDestination.droppableId);
+      result[droppableSource.droppableId] = sourceClone;
+      result[droppableDestination.droppableId] = destClone;
+
+      console.log("result");
+      console.log(result);
+
+      return result;
+   };
+
+   const onDragEnd = (result: any) => {
+      const { source, destination } = result;
+
+      // dropped outside the list
+      if (!destination) return;
+
+      if (source.droppableId === destination.droppableId) {
+         setJos((prev) => {
+            let jos = [...prev];
+            jos[parseInt(source.droppableId)] = reorder(
+               prev[parseInt(source.droppableId)],
+               source.index,
+               destination.index
+            );
+            return jos;
+         });
+      } else {
+         const result: member[][] = move(
+            jos[parseInt(source.droppableId)],
+            jos[parseInt(destination.droppableId)],
+            source,
+            destination
+         );
+
+         setJos(result);
+      }
+   };
+   // const onDragEnd = (result: any) => {
+   //    console.log(result);
+   //    setJos((prev) => {
+   //       let jos = [...prev];
+   //       jos[0] = reorder(prev[0], result.source.index, result.destination.index);
+   //       return jos;
+   //    });
+   // };
 
    function renderJos() {
       return (
-         <Grid container>
-            {jos.map((jo) => {
-               return (
-                  <Grid item xs={6}>
+         <DragDropContext onDragEnd={onDragEnd}>
+            <Grid container minHeight={150}>
+               {jos.map((jo, index) => (
+                  <Grid item xs={showProperties ? 6 : 4}>
                      <Paper sx={{ m: 1, p: 1, backgroundColor: "lightblue" }}>
-                        {jo.map((member) => (
-                           <Box sx={{ display: "flex" }}>
-                              <Box width="35%">
-                                 <Typography>{member.name}</Typography>
-                              </Box>
-                              <Box width="25%">
-                                 <Typography style={{ color: member.sex === "male" ? "blue" : "DeepPink" }}>
-                                    {member.sex}
-                                 </Typography>
-                              </Box>
-                              <Box width="25%">
-                                 <Typography color="secondary">{member.year}</Typography>
-                              </Box>
-                              <Box width="15%">
-                                 <Typography style={{ color: member.leader ? "green" : "red" }}>
-                                    {member.leader ? "true" : "false"}
-                                 </Typography>
-                              </Box>
-                           </Box>
-                        ))}
+                        <Droppable droppableId={index.toString()}>
+                           {(provided, snapshot) => (
+                              <div ref={provided.innerRef}>
+                                 {jo.map((member, index) => (
+                                    <Draggable draggableId={member.id} key={member.id} index={index}>
+                                       {(provided, snapshot) => (
+                                          <div
+                                             ref={provided.innerRef}
+                                             {...provided.draggableProps}
+                                             {...provided.dragHandleProps}
+                                          >
+                                             <Box>
+                                                <div
+                                                   style={{
+                                                      display: "flex",
+                                                      backgroundColor: "transparent",
+                                                      padding: "5px",
+                                                      alignItems: "center",
+                                                   }}
+                                                >
+                                                   {renderJoMember(member)}
+                                                </div>
+                                             </Box>
+                                          </div>
+                                       )}
+                                    </Draggable>
+                                 ))}
+                                 {provided.placeholder}
+                              </div>
+                           )}
+                        </Droppable>
                      </Paper>
                   </Grid>
-               );
-            })}
-         </Grid>
+               ))}
+            </Grid>
+         </DragDropContext>
       );
+      // return (
+      //    <Grid container>
+      //       {jos.map((jo) => {
+      //          return (
+      //             <Grid item xs={6}>
+      //                <Paper sx={{ m: 1, p: 1, backgroundColor: "lightblue" }}>
+      //                   {jo.map((member) => (
+      //                      <Box sx={{ display: "flex" }}>
+      //                         <Box width="35%">
+      //                            <Typography>{member.name}</Typography>
+      //                         </Box>
+      //                         <Box width="25%">
+      //                            <Typography style={{ color: member.sex === "male" ? "blue" : "DeepPink" }}>
+      //                               {member.sex}
+      //                            </Typography>
+      //                         </Box>
+      //                         <Box width="25%">
+      //                            <Typography color="secondary">{member.year}</Typography>
+      //                         </Box>
+      //                         <Box width="15%">
+      //                            <Typography style={{ color: member.leader ? "green" : "red" }}>
+      //                               {member.leader ? "true" : "false"}
+      //                            </Typography>
+      //                         </Box>
+      //                      </Box>
+      //                   ))}
+      //                </Paper>
+      //             </Grid>
+      //          );
+      //       })}
+      //    </Grid>
+      // );
+   }
+
+   function renderJoMember(member: member) {
+      if (showProperties) {
+         return (
+            <div
+               style={{
+                  display: "flex",
+                  backgroundColor: "#cbeef2",
+                  padding: "5px",
+                  borderRadius: "5px",
+                  width: "100%",
+               }}
+            >
+               <Box width="35%">
+                  <Typography>{member.name}</Typography>
+               </Box>
+               <Box width="25%">
+                  <Typography
+                     style={{
+                        color: member.sex === "male" ? "blue" : "DeepPink",
+                     }}
+                  >
+                     {member.sex}
+                  </Typography>
+               </Box>
+               <Box width="25%">
+                  <Typography color="secondary">{member.year}</Typography>
+               </Box>
+               <Box width="15%">
+                  <Typography style={{ color: member.leader ? "green" : "red" }}>
+                     {member.leader ? "true" : "false"}
+                  </Typography>
+               </Box>
+            </div>
+         );
+      } else {
+         return (
+            <div
+               style={{
+                  display: "flex",
+                  backgroundColor: "#cbeef2",
+                  padding: "5px",
+                  borderRadius: "5px",
+                  width: "100%",
+                  justifyContent: "center",
+               }}
+            >
+               <Box>
+                  <Typography>{member.name}</Typography>
+               </Box>
+            </div>
+         );
+      }
    }
 
    return (
@@ -257,9 +426,21 @@ function App() {
                </Paper>
             </Grid>
             <Grid item xs={6}>
-               <Paper sx={{ mb: 2, p: 2, backgroundColor: "Gainsboro", minHeight: "300px" }}>
+               <Paper sx={{ mb: 2, p: 2, backgroundColor: "Gainsboro" }}>
                   <Typography variant="h6">Jos:</Typography>
                   {renderJos()}
+                  <Button sx={{ mt: 1, mr: 2 }} variant="contained" onClick={() => createJos()}>
+                     Create New Jos
+                  </Button>
+                  <FormControlLabel
+                     control={
+                        <Switch
+                           value={showProperties}
+                           onChange={(e: any) => setShowProperties(e.target.checked)}
+                        ></Switch>
+                     }
+                     label="Show Properties"
+                  />
                </Paper>
                <Paper sx={{ p: 2, backgroundColor: "Gainsboro" }}>
                   <Typography variant="h6">Settings:</Typography>
@@ -292,7 +473,7 @@ function App() {
                   <Typography display="inline" variant="subtitle2">
                      In order of importance (WIP)
                   </Typography>
-                  <Switch disabled/>
+                  <Switch disabled />
                   <Typography sx={{ mt: 1 }} variant="subtitle1">
                      Exclusion List: Members that cannot be grouped together
                   </Typography>
@@ -307,11 +488,7 @@ function App() {
                   <Typography display="inline" variant="subtitle2">
                      In order of importance (WIP)
                   </Typography>
-                  <Switch disabled/>
-                  <div></div>
-                  <Button sx={{ mt: 1 }} variant="contained" onClick={() => createJos()}>
-                     Create Jos
-                  </Button>
+                  <Switch disabled />
                </Paper>
             </Grid>
          </Grid>

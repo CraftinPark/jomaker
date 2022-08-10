@@ -16,7 +16,6 @@ export const sampleList: member[] = [
    { name: "Grace", year: 2002, sex: "female", leader: false },
    { name: "Rebecca", year: 2003, sex: "female", leader: false },
    { name: "Jueun", year: 2001, sex: "female", leader: true },
-   { name: "Gansanim", year: 1995, sex: "female", leader: true },
 ];
 
 export const smallList: member[] = [

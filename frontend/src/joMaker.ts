@@ -1,6 +1,7 @@
 export type sex = "male" | "female";
 
 export type member = {
+   id: string;
    name: string;
    year: number;
    sex: sex;
@@ -107,8 +108,6 @@ export function shuffleMembers(members: member[]): void {
 // - age score: a point for each member with same year as another member in jo
 // - sex score: the difference in # of males to # of females in jo (unless only 1 member)
 // - leader score: a point for each leader in a group (that is not the first leader)
-// - inclusion list: if member in inclusion list is not included in jo, 100 points
-// - exclusion list: if member is in the same jo as another member in exclusion list, 100 points
 // ############################################################################
 
 export function calculateTotalScore(jos: member[][], inclusionList: string[][], exclusionList: string[][]): number {
@@ -161,13 +160,9 @@ function leaderScore(jo: member[]): number {
    for (let i = 0; i < jo.length; i++) {
       if (jo[i].leader === true) numLeaders++;
    }
-   if (numLeaders > 0) return (numLeaders - 1) * 3;
-   else return 3;
+   if (numLeaders > 0) return numLeaders - 1;
+   else return 1;
 }
-
-// sample inclusionList:
-// [[ "John", "Christina" ],
-// [ "Daniel", "Elliot" ]]
 
 function inclusionScore(jo: member[], inclusionList: string[][]): number {
    // check each member in jo for whether they are in the inclusion list.

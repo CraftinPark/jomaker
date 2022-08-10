@@ -11,17 +11,17 @@ export type member = {
 
 export function createDiversifiedJos(n: number, list: member[], inclusionList: string[][], exclusionList: string[][]) {
    let jos: member[][] = turntableAssign(n, list);
-   //    console.log("start");
+      console.log("start");
    // await continuePrompt();
 
    for (let i = 0; i < jos.length; i++) {
       for (let j = 0; j < jos[i].length; j++) {
          let startScore: number = calculateTotalScore(jos, inclusionList, exclusionList);
 
-         //  console.log("start swaps for new element");
-         //  console.log("indices: ", i, j);
-         //  console.log(JSON.stringify(jos, null, 4));
-         //  console.log(calculateTotalScore(jos, inclusionList, exclusionList));
+          console.log("start swaps for new element");
+          console.log("indices: ", i, j);
+          console.log(JSON.stringify(jos, null, 4));
+          console.log(calculateTotalScore(jos, inclusionList, exclusionList));
          // await continuePrompt();
 
          // greedily swap for improvement in score.
@@ -33,25 +33,25 @@ export function createDiversifiedJos(n: number, list: member[], inclusionList: s
             for (let l = 0; l < jos[i].length; l++) {
                if (k === i && l === j) continue;
 
-               //    console.log("swap with");
-               //    console.log("indices: ", k, l);
+                  console.log("swap with");
+                  console.log("indices: ", k, l);
 
                swap([i, j], [k, l], jos);
 
-               //    console.log(JSON.stringify(jos, null, 4));
-               //    console.log(calculateTotalScore(jos, inclusionList, exclusionList));
+                  console.log(JSON.stringify(jos, null, 4));
+                  console.log(calculateTotalScore(jos, inclusionList, exclusionList));
 
                let swappedScore: number = calculateTotalScore(jos, inclusionList, exclusionList);
                swap([i, j], [k, l], jos);
-               //    console.log("swap back");
-               //    console.log(JSON.stringify(jos, null, 4));
+                  console.log("swap back");
+                  console.log(JSON.stringify(jos, null, 4));
 
                if (swappedScore < bestSwappedScore) {
                   bestSwappedScore = swappedScore;
                   bestSwappedMember = [k, l];
-                  //   console.log("NEW BEST SCORE!");
+                    console.log("NEW BEST SCORE!");
                }
-               //    console.log("current best score: ", bestSwappedScore);
+                  console.log("current best score: ", bestSwappedScore);
                // await continuePrompt();
             }
          }
@@ -211,11 +211,57 @@ function exclusionScore(jo: member[], inclusionList: string[][]): number {
    return score;
 }
 
-let list = sampleList;
-shuffleMembers(list);
-let jos = createDiversifiedJos(3, list, [["John", "Christina", "Daniel", "Danny", "Christian"]], [["Elliot", "Jueun"]]);
-console.log(jos);
-console.log(calculateTotalScore(jos, [["John", "Christina", "Daniel"]], [["Elliot", "Jueun"]]));
+function bruteList(n: number) {
+   let scores = [];
+   for (let i = 0; i < n; i++) {
+      let list = [...sampleList];
+      shuffleMembers(list);
+      scores.push(
+         calculateTotalScore(
+            createDiversifiedJos(
+               3,
+               list,
+               [
+                  ["Daniel", "Annie", "John"],
+                  ["Rebecca", "Sunny"],
+               ],
+               [["John", "Christina"]]
+            ),
+            [
+               ["Daniel", "Annie", "John"],
+               ["Rebecca", "Sunny"],
+            ],
+            [["John", "Christina"]]
+         )
+      );
+   }
+   console.dir(scores, { maxArrayLength: null });
+}
+
+bruteList(100);
+
+// let list = sampleList;
+// shuffleMembers(list);
+// let jos = createDiversifiedJos(
+//    3,
+//    list,
+//    [
+//       ["Daniel", "Annie", "John"],
+//       ["Rebecca", "Sunny"],
+//    ],
+//    [["John", "Christina"]]
+// );
+// console.log(jos);
+// console.log(
+//    calculateTotalScore(
+//       jos,
+//       [
+//          ["Daniel", "Annie", "John"],
+//          ["Rebecca", "Sunny"],
+//       ],
+//       [["John", "Christina"]]
+//    )
+// );
 
 // let jo: member[] = [
 //    { name: "Gansanim", year: 1995, sex: "female", leader: true },
