@@ -190,7 +190,7 @@ function App() {
 
    function parseList(list: string) {
       let inclist = list;
-      let incs = inclist.split(/\,\s?(?![^\(]*\))/);
+      let incs = inclist.split(/\s?(?![^]*\))/);
       incs.forEach((inc, idx) => (incs[idx] = inc.substring(1, inc.length - 1)));
       let is: string[][] = [];
       for (let i = 0; i < incs.length; i++) {
