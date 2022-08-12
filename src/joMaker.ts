@@ -6,6 +6,7 @@ export type member = {
    year: number;
    sex: sex;
    leader: boolean;
+   active: boolean;
 };
 
 export function createDiversifiedJos(n: number, list: member[], inclusionList: string[][], exclusionList: string[][]) {
@@ -17,12 +18,6 @@ export function createDiversifiedJos(n: number, list: member[], inclusionList: s
       for (let j = 0; j < jos[i].length; j++) {
          let startScore: number = calculateTotalScore(jos, inclusionList, exclusionList);
 
-         //  console.log("start swaps for new element");
-         //  console.log("indices: ", i, j);
-         //  console.log(JSON.stringify(jos, null, 4));
-         //  console.log(calculateTotalScore(jos, inclusionList, exclusionList));
-         // await continuePrompt();
-
          // greedily swap for improvement in score.
          let bestSwappedScore: number = 1000000000;
          let bestSwappedMember: number[] = [0, 0];
@@ -31,9 +26,6 @@ export function createDiversifiedJos(n: number, list: member[], inclusionList: s
             if (k === i) continue;
             for (let l = 0; l < jos[i].length; l++) {
                if (k === i && l === j) continue;
-
-               //    console.log("swap with");
-               //    console.log("indices: ", k, l);
 
                swap([i, j], [k, l], jos);
 
@@ -108,6 +100,8 @@ export function shuffleMembers(members: member[]): void {
 // - age score: a point for each member with same year as another member in jo
 // - sex score: the difference in # of males to # of females in jo (unless only 1 member)
 // - leader score: a point for each leader in a group (that is not the first leader)
+// - inclusion list: if member in inclusion list is not included in jo, 100 points
+// - exclusion list: if member is in the same jo as another member in exclusion list, 100 points
 // ############################################################################
 
 export function calculateTotalScore(jos: member[][], inclusionList: string[][], exclusionList: string[][]): number {

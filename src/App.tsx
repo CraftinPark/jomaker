@@ -2,8 +2,11 @@ import {
    AppBar,
    Box,
    Button,
+   ClickAwayListener,
+   Divider,
    FormControlLabel,
    Grid,
+   IconButton,
    MenuItem,
    Paper,
    Select,
@@ -11,11 +14,13 @@ import {
    Switch,
    TextField,
    Toolbar,
+   Tooltip,
    Typography,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
+import { Person, ContentCopy } from "@mui/icons-material";
 import { member, sex, createDiversifiedJos, shuffleMembers, turntableAssign, calculateTotalScore } from "./joMaker";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { DragDropContext, Droppable, Draggable, DroppableProps } from "react-beautiful-dnd";
 import { v4 as uuidv4 } from "uuid";
 
 function App() {
@@ -54,23 +59,18 @@ function App() {
       localStorage.setItem("exclusionList", exclusionList);
    }, [exclusionList]);
 
-   const [jos, setJos] = useState<member[][]>([]);
+   const [jos, setJos] = useState<member[][]>((): member[][] => {
+      const localData = localStorage.getItem("jos");
+      return localData ? JSON.parse(localData) : [];
+   });
 
    useEffect(() => {
-      console.log(jos);
+      localStorage.setItem("jos", JSON.stringify(jos));
    }, [jos]);
 
    const [showProperties, setShowProperties] = useState<boolean>(false);
 
    function renderMembers() {
-      let tableStyle = {
-         backgroundColor: "white",
-         outlineStyle: "solid",
-         display: "flex",
-         justifyContent: "center",
-         alignItems: "center",
-      };
-
       let tableHeaderStyle = {
          backgroundColor: "gray",
          outlineStyle: "solid",
@@ -99,10 +99,40 @@ function App() {
                </Box>
             </Box>
             {members.map((member, index) => {
+               let tableStyle = {
+                  backgroundColor: member.active ? "lightgreen" : "white",
+                  outlineStyle: "solid",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+               };
                return (
-                  <Box sx={{ display: "flex" }}>
+                  <Box sx={{ display: "flex", backgroundColor: "lightgreen" }}>
                      <Box sx={tableStyle} width="22.5%">
-                        <Typography>{member.name}</Typography>
+                        <button
+                           style={{
+                              background: "none",
+                              color: "inherit",
+                              border: "none",
+                              padding: 0,
+                              font: "inherit",
+                              cursor: "pointer",
+                              outline: "none",
+                              width: "100%",
+                              height: "100%",
+                           }}
+                           onClick={() => {
+                              setMembers((prev) => {
+                                 let updateMember = prev[index];
+                                 updateMember.active = !updateMember.active;
+                                 let newMembers = [...prev];
+                                 newMembers[index] = updateMember;
+                                 return newMembers;
+                              });
+                           }}
+                        >
+                           <Typography>{member.name}</Typography>
+                        </button>
                      </Box>
                      <Box sx={tableStyle} width="22.5%">
                         <Typography>{member.sex}</Typography>
@@ -185,7 +215,10 @@ function App() {
 
    function addMember() {
       if (!name || !sex || !year || leader === undefined) return;
-      setMembers((current) => [...current, { id: uuidv4(), name: name, sex: sex, year: year, leader: leader }]);
+      setMembers((current) => [
+         ...current,
+         { id: uuidv4(), name: name, sex: sex, year: year, leader: leader, active: true },
+      ]);
    }
 
    function parseList(list: string) {
@@ -203,12 +236,13 @@ function App() {
 
    function createJos() {
       let mems = [...members];
-      shuffleMembers(mems);
+      let activeMems = mems.filter((mem) => mem.active);
+      shuffleMembers(activeMems);
       let incList = parseList(inclusionList);
       let excList = parseList(exclusionList);
       let jos: member[][] = [];
-      if (useAlgorithm) jos = createDiversifiedJos(numJos, mems, incList, excList);
-      else jos = turntableAssign(numJos, mems);
+      if (useAlgorithm) jos = createDiversifiedJos(numJos, activeMems, incList, excList);
+      else jos = turntableAssign(numJos, activeMems);
       setJos(jos);
       console.log(calculateTotalScore(jos, incList, excList));
    }
@@ -276,82 +310,152 @@ function App() {
    //    });
    // };
 
-   function renderJos() {
+   function RenderJos() {
+      const [clickedCopy, setClickedCopy] = useState<boolean>(false);
+
+      function josToClipboard() {
+         let josNames: string = jos.map((jo) => jo.map((member) => member.name).join("\n")).join("\n\n");
+         navigator.clipboard.writeText(josNames);
+      }
+
       return (
          <DragDropContext onDragEnd={onDragEnd}>
             <Grid container minHeight={150}>
                {jos.map((jo, index) => (
-                  <Grid item xs={showProperties ? 6 : 4}>
-                     <Paper sx={{ m: 1, p: 1, backgroundColor: "lightblue" }}>
-                        <Droppable droppableId={index.toString()}>
-                           {(provided, snapshot) => (
-                              <div ref={provided.innerRef}>
-                                 {jo.map((member, index) => (
-                                    <Draggable draggableId={member.id} key={member.id} index={index}>
-                                       {(provided, snapshot) => (
-                                          <div
-                                             ref={provided.innerRef}
-                                             {...provided.draggableProps}
-                                             {...provided.dragHandleProps}
-                                          >
-                                             <Box>
-                                                <div
-                                                   style={{
-                                                      display: "flex",
-                                                      backgroundColor: "transparent",
-                                                      padding: "5px",
-                                                      alignItems: "center",
-                                                   }}
-                                                >
-                                                   {renderJoMember(member)}
-                                                </div>
-                                             </Box>
-                                          </div>
-                                       )}
-                                    </Draggable>
-                                 ))}
-                                 {provided.placeholder}
-                              </div>
-                           )}
-                        </Droppable>
-                     </Paper>
-                  </Grid>
+                  <RenderJo jo={jo} index={index}></RenderJo>
                ))}
             </Grid>
+            <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+               <FormControlLabel
+                  control={
+                     <Switch value={showProperties} onChange={(e: any) => setShowProperties(e.target.checked)}></Switch>
+                  }
+                  label="Show Properties"
+               />
+               <ClickAwayListener
+                  onClickAway={() => {
+                     setClickedCopy(false);
+                  }}
+               >
+                  <Tooltip
+                     PopperProps={{
+                        disablePortal: true,
+                     }}
+                     open={clickedCopy}
+                     disableFocusListener
+                     disableHoverListener
+                     disableTouchListener
+                     title="Copied Jos!"
+                     arrow
+                  >
+                     <IconButton>
+                        <ContentCopy
+                           onClick={() => {
+                              setClickedCopy(true);
+                              josToClipboard();
+                           }}
+                        ></ContentCopy>
+                     </IconButton>
+                  </Tooltip>
+               </ClickAwayListener>
+            </Box>
          </DragDropContext>
       );
-      // return (
-      //    <Grid container>
-      //       {jos.map((jo) => {
-      //          return (
-      //             <Grid item xs={6}>
-      //                <Paper sx={{ m: 1, p: 1, backgroundColor: "lightblue" }}>
-      //                   {jo.map((member) => (
-      //                      <Box sx={{ display: "flex" }}>
-      //                         <Box width="35%">
-      //                            <Typography>{member.name}</Typography>
-      //                         </Box>
-      //                         <Box width="25%">
-      //                            <Typography style={{ color: member.sex === "male" ? "blue" : "DeepPink" }}>
-      //                               {member.sex}
-      //                            </Typography>
-      //                         </Box>
-      //                         <Box width="25%">
-      //                            <Typography color="secondary">{member.year}</Typography>
-      //                         </Box>
-      //                         <Box width="15%">
-      //                            <Typography style={{ color: member.leader ? "green" : "red" }}>
-      //                               {member.leader ? "true" : "false"}
-      //                            </Typography>
-      //                         </Box>
-      //                      </Box>
-      //                   ))}
-      //                </Paper>
-      //             </Grid>
-      //          );
-      //       })}
-      //    </Grid>
-      // );
+   }
+
+   const StrictModeDroppable = ({ children, ...props }: DroppableProps) => {
+      const [enabled, setEnabled] = useState(false);
+
+      useEffect(() => {
+         const animation = requestAnimationFrame(() => setEnabled(true));
+
+         return () => {
+            cancelAnimationFrame(animation);
+            setEnabled(false);
+         };
+      }, []);
+
+      if (!enabled) {
+         return null;
+      }
+
+      return <Droppable {...props}>{children}</Droppable>;
+   };
+
+   function RenderJo({ jo, index }: { jo: member[]; index: number }) {
+      const [clickedCopy, setClickedCopy] = useState<boolean>(false);
+
+      function joToClipboard() {
+         let joNames: string = jo.map((member) => member.name).join("\n");
+         navigator.clipboard.writeText(joNames);
+      }
+
+      return (
+         <Grid item xs={4}>
+            <Paper sx={{ m: 1, p: 1, backgroundColor: "lightblue" }}>
+               <StrictModeDroppable droppableId={index.toString()}>
+                  {(provided, snapshot) => (
+                     <div ref={provided.innerRef}>
+                        {jo.map((member, index) => (
+                           <Draggable draggableId={member.id} key={member.id} index={index}>
+                              {(provided, snapshot) => (
+                                 <div
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                    {...provided.dragHandleProps}
+                                 >
+                                    <Box>
+                                       <div
+                                          style={{
+                                             display: "flex",
+                                             backgroundColor: "transparent",
+                                             padding: "5px",
+                                             alignItems: "center",
+                                          }}
+                                       >
+                                          {renderJoMember(member)}
+                                       </div>
+                                    </Box>
+                                 </div>
+                              )}
+                           </Draggable>
+                        ))}
+                        {provided.placeholder}
+                     </div>
+                  )}
+               </StrictModeDroppable>
+               <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                  <ClickAwayListener
+                     onClickAway={() => {
+                        setClickedCopy(false);
+                     }}
+                  >
+                     <Tooltip
+                        PopperProps={{
+                           disablePortal: true,
+                        }}
+                        open={clickedCopy}
+                        disableFocusListener
+                        disableHoverListener
+                        disableTouchListener
+                        title="Copied Jo!"
+                        arrow
+                     >
+                        <IconButton
+                           onClick={() => {
+                              setClickedCopy(true);
+                              joToClipboard();
+                           }}
+                           sx={{ p: 0.5 }}
+                        >
+                           <ContentCopy fontSize="small"></ContentCopy>
+                        </IconButton>
+                     </Tooltip>
+                  </ClickAwayListener>
+               </Box>
+            </Paper>
+         </Grid>
+      );
    }
 
    function renderJoMember(member: member) {
@@ -366,26 +470,31 @@ function App() {
                   width: "100%",
                }}
             >
-               <Box width="35%">
-                  <Typography>{member.name}</Typography>
-               </Box>
-               <Box width="25%">
-                  <Typography
-                     style={{
-                        color: member.sex === "male" ? "blue" : "DeepPink",
+               <Grid container spacing={0}>
+                  <Grid item xs={6} justifyContent="center">
+                     <Typography>{member.name}</Typography>
+                  </Grid>
+                  <Grid item xs={2} sx={{ flexGrow: 1, textAlign: "center" }}>
+                     <Typography style={{ color: member.sex === "male" ? "blue" : "DeepPink" }}>
+                        {member.sex === "male" ? "M" : "F"}
+                     </Typography>
+                  </Grid>
+                  <Grid item xs={2} sx={{ flexGrow: 1, textAlign: "center" }}>
+                     <Typography color="secondary">{member.year.toString().slice(2)}</Typography>
+                  </Grid>
+                  <Grid
+                     item
+                     xs={2}
+                     sx={{
+                        flexGrow: 1,
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
                      }}
                   >
-                     {member.sex}
-                  </Typography>
-               </Box>
-               <Box width="25%">
-                  <Typography color="secondary">{member.year}</Typography>
-               </Box>
-               <Box width="15%">
-                  <Typography style={{ color: member.leader ? "green" : "red" }}>
-                     {member.leader ? "true" : "false"}
-                  </Typography>
-               </Box>
+                     {member.leader ? <Person fontSize="small" style={{ color: "green" }}></Person> : ""}
+                  </Grid>
+               </Grid>
             </div>
          );
       } else {
@@ -409,11 +518,14 @@ function App() {
    }
 
    return (
-      <Box sx={{ flexGrow: 1 }}>
+      <Box sx={{ flexGrow: 1, backgroundColor: "#a9a9a9" }}>
          <AppBar position="static">
             <Toolbar variant="dense">
-               <Typography variant="h6" color="inherit" component="div">
+               <Typography variant="h4" color="inherit" component="div" paddingRight={2}>
                   Jo Maker
+               </Typography>
+               <Typography variant="h6" color="inherit" component="div">
+                  unbiased diversified team generator
                </Typography>
             </Toolbar>
          </AppBar>
@@ -426,42 +538,37 @@ function App() {
                </Paper>
             </Grid>
             <Grid item xs={6}>
-               <Paper sx={{ mb: 2, p: 2, backgroundColor: "Gainsboro" }}>
+               <Paper sx={{ mb: 2, p: 2, pb: 0.5, backgroundColor: "Gainsboro" }}>
                   <Typography variant="h6">Jos:</Typography>
-                  {renderJos()}
-                  <Button sx={{ mt: 1, mr: 2 }} variant="contained" onClick={() => createJos()}>
-                     Create New Jos
-                  </Button>
-                  <FormControlLabel
-                     control={
-                        <Switch
-                           value={showProperties}
-                           onChange={(e: any) => setShowProperties(e.target.checked)}
-                        ></Switch>
-                     }
-                     label="Show Properties"
-                  />
+                  {RenderJos()}
                </Paper>
                <Paper sx={{ p: 2, backgroundColor: "Gainsboro" }}>
                   <Typography variant="h6">Settings:</Typography>
-                  <Typography variant="subtitle1">Number of Jos:</Typography>
-                  <Slider
-                     aria-label="Number of Jos"
-                     defaultValue={4}
-                     value={numJos}
-                     onChange={(e: any) => setNumJos(e.target.value)}
-                     valueLabelDisplay="auto"
-                     step={1}
-                     min={2}
-                     max={10}
-                  />
-                  <Typography variant="subtitle1">Use Diversifier Algorithm:</Typography>
-                  <Switch
-                     defaultChecked
-                     value={useAlgorithm}
-                     onChange={(e: any) => setUseAlgorithm(e.target.checked)}
-                  />
-                  <Typography variant="subtitle1">Inclusion List: Members that must be grouped together</Typography>
+                  <Grid container spacing={2}>
+                     <Grid item xs={6}>
+                        <Typography variant="subtitle1">Number of Jos:</Typography>
+                        <Slider
+                           aria-label="Number of Jos"
+                           defaultValue={4}
+                           value={numJos}
+                           onChange={(e: any) => setNumJos(e.target.value)}
+                           valueLabelDisplay="auto"
+                           step={1}
+                           min={2}
+                           max={10}
+                        />
+                     </Grid>
+                     <Grid item xs={6}>
+                        <Typography variant="subtitle1">Use Diversifier Algorithm:</Typography>
+                        <Switch
+                           defaultChecked
+                           value={useAlgorithm}
+                           onChange={(e: any) => setUseAlgorithm(e.target.checked)}
+                        />
+                     </Grid>
+                  </Grid>
+
+                  <Typography variant="subtitle1">Inclusion List:</Typography>
                   <TextField
                      placeholder="surround each inclusion group with parantheses, separated by commas"
                      fullWidth
@@ -475,7 +582,7 @@ function App() {
                   </Typography>
                   <Switch disabled />
                   <Typography sx={{ mt: 1 }} variant="subtitle1">
-                     Exclusion List: Members that cannot be grouped together
+                     Exclusion List:
                   </Typography>
                   <TextField
                      placeholder="surround each exclusion group with parantheses, separated by commas"
@@ -489,6 +596,10 @@ function App() {
                      In order of importance (WIP)
                   </Typography>
                   <Switch disabled />
+                  <Divider light />
+                  <Button sx={{ mt: 1, mr: 2 }} variant="contained" onClick={() => createJos()}>
+                     Create New Jos
+                  </Button>
                </Paper>
             </Grid>
          </Grid>
