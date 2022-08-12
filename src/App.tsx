@@ -363,25 +363,6 @@ function App() {
       );
    }
 
-   const StrictModeDroppable = ({ children, ...props }: DroppableProps) => {
-      const [enabled, setEnabled] = useState(false);
-
-      useEffect(() => {
-         const animation = requestAnimationFrame(() => setEnabled(true));
-
-         return () => {
-            cancelAnimationFrame(animation);
-            setEnabled(false);
-         };
-      }, []);
-
-      if (!enabled) {
-         return null;
-      }
-
-      return <Droppable {...props}>{children}</Droppable>;
-   };
-
    function RenderJo({ jo, index }: { jo: member[]; index: number }) {
       const [clickedCopy, setClickedCopy] = useState<boolean>(false);
 
@@ -393,7 +374,7 @@ function App() {
       return (
          <Grid item xs={4}>
             <Paper sx={{ m: 1, p: 1, backgroundColor: "lightblue" }}>
-               <StrictModeDroppable droppableId={index.toString()}>
+               <Droppable droppableId={index.toString()}>
                   {(provided, snapshot) => (
                      <div ref={provided.innerRef}>
                         {jo.map((member, index) => (
@@ -423,7 +404,7 @@ function App() {
                         {provided.placeholder}
                      </div>
                   )}
-               </StrictModeDroppable>
+               </Droppable>
                <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
                   <ClickAwayListener
                      onClickAway={() => {
