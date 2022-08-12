@@ -1,13 +1,4 @@
-export type sex = "male" | "female";
-
-export type member = {
-   id: string;
-   name: string;
-   year: number;
-   sex: sex;
-   leader: boolean;
-   active: boolean;
-};
+import { member } from "./types";
 
 export function createDiversifiedJos(n: number, list: member[], inclusionList: string[][], exclusionList: string[][]) {
    let jos: member[][] = turntableAssign(n, list);

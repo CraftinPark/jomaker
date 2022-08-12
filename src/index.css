@@ -2,3 +2,10 @@ body {
    margin: 0;
    background-color: #a9a9a9;
 }
+
+@font-face {
+   font-family: "Rubik";
+   src: local("Rubik-VariableFont_wght"), url(./fonts/Rubik-VariableFont_wght.ttf) format("truetype");
+   font-weight: normal;
+ }
+
