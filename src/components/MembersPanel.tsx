@@ -17,18 +17,18 @@ const MembersPanel = ({ members, setMembers }: MembersPanelProps) => {
    const [year, setYear] = useState<number>(2000);
    const [leader, setLeader] = useState<boolean>(false);
 
-   function addMember() {
+   function addMember(): void {
       if (!name || !kName || !sex || !year || leader === undefined) return;
       setMembers((current) => [...current, { id: uuidv4(), name, kName: kName, sex, year, leader, active: true }]);
    }
 
-   function removeMember(index: number) {
+   function removeMember(index: number): void {
       let mems = [...members];
       mems.splice(index, 1);
       setMembers(mems);
    }
 
-   function renderMembers() {
+   function renderMembers(): JSX.Element {
       return (
          <Box sx={{ mt: 1, mb: 2 }}>
             <Box sx={{ display: "flex" }}>
@@ -123,7 +123,7 @@ const MembersPanel = ({ members, setMembers }: MembersPanelProps) => {
       );
    }
 
-   function newMemberForm() {
+   function newMemberForm(): JSX.Element {
       return (
          <Box sx={{ display: "flex" }}>
             <Box sx={tableFormCell} width="24.5%">

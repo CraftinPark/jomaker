@@ -1,10 +1,10 @@
+import React, { useEffect, useState } from "react";
 import { AppBar, Box, Grid, IconButton, Toolbar, Typography } from "@mui/material";
 import { GitHub } from "@mui/icons-material";
-import React, { useEffect, useState } from "react";
-
-import { createDiversifiedJos, shuffleMembers, turntableAssign, calculateTotalScore } from "./util/joMaker";
 
 import { member } from "./util/types";
+import { createDiversifiedJos, turntableAssign, calculateTotalScore } from "./util/joMaker";
+
 import MembersPanel from "./components/MembersPanel";
 import JosPanel from "./components/JosPanel";
 import SettingsPanel from "./components/SettingsPanel";
@@ -43,8 +43,8 @@ function App() {
       localStorage.setItem("exclusionList", exclusionList);
    }, [exclusionList]);
 
-   function parseConditionList(list: string) {
-      const conditions = list.split(/\s?(?![^]*\))/);
+   function parseConditionList(list: string): string[][] {
+      const conditions: string[] = list.split(/\s?(?![^]*\))/);
       conditions.forEach((condition, idx) => (conditions[idx] = condition.substring(1, condition.length - 1)));
       const conditionArray: string[][] = [];
       for (let i = 0; i < conditions.length; i++) {
@@ -55,11 +55,10 @@ function App() {
    }
 
    function createJos(): void {
-      const mems = [...members];
-      const activeMems = mems.filter((mem) => mem.active);
-      shuffleMembers(activeMems);
-      const incList = parseConditionList(inclusionList);
-      const excList = parseConditionList(exclusionList);
+      const mems: member[] = [...members];
+      const activeMems: member[] = mems.filter((mem: member) => mem.active);
+      const incList: string[][] = parseConditionList(inclusionList);
+      const excList: string[][] = parseConditionList(exclusionList);
       let jos: member[][] = [];
       if (useAlgorithm) jos = createDiversifiedJos(numJos, activeMems, incList, excList);
       else jos = turntableAssign(numJos, activeMems);

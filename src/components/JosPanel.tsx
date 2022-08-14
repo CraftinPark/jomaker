@@ -33,7 +33,12 @@ const JosPanel = ({ jos, setJos }: JosPanelProps) => {
       return result;
    };
 
-   const move = (source: member[], destination: member[], droppableSource: any, droppableDestination: any) => {
+   const move = (
+      source: member[],
+      destination: member[],
+      droppableSource: any,
+      droppableDestination: any
+   ): member[][] => {
       const sourceClone = Array.from(source);
       const destClone = Array.from(destination);
       const [removed] = sourceClone.splice(droppableSource.index, 1);
@@ -44,7 +49,7 @@ const JosPanel = ({ jos, setJos }: JosPanelProps) => {
       return result;
    };
 
-   const onDragEnd = (result: any) => {
+   const onDragEnd = (result: any): void => {
       const { source, destination } = result;
       if (!destination) return;
       if (source.droppableId === destination.droppableId) {
@@ -68,20 +73,20 @@ const JosPanel = ({ jos, setJos }: JosPanelProps) => {
       }
    };
 
-   function josToClipboard() {
+   function josToClipboard(jos: member[][]): void {
       let josNames: string = jos
          .map((jo) => jo.map((member) => (useKoreanNames ? member.kName : member.name) + " ").join("\n"))
          .join("\n\n");
       navigator.clipboard.writeText(josNames);
    }
 
-   function RenderJo({ jo, index }: { jo: member[]; index: number }) {
-      const [clickedCopyJo, setClickedCopyJos] = useState<boolean>(false);
+   function joToClipboard(jo: member[]): void {
+      let joNames: string = jo.map((member) => (useKoreanNames ? member.kName : member.name) + " ").join("\n");
+      navigator.clipboard.writeText(joNames);
+   }
 
-      function joToClipboard() {
-         let joNames: string = jo.map((member) => (useKoreanNames ? member.kName : member.name) + " ").join("\n");
-         navigator.clipboard.writeText(joNames);
-      }
+   function RenderJo({ jo, index }: { jo: member[]; index: number }): JSX.Element {
+      const [clickedCopyJo, setClickedCopyJos] = useState<boolean>(false);
 
       return (
          <Grid item xs={12} sm={6} lg={4}>
@@ -113,7 +118,7 @@ const JosPanel = ({ jos, setJos }: JosPanelProps) => {
                         <IconButton
                            onClick={() => {
                               setClickedCopyJos(true);
-                              joToClipboard();
+                              joToClipboard(jo);
                            }}
                            sx={{ p: 0.5 }}
                         >
@@ -127,7 +132,7 @@ const JosPanel = ({ jos, setJos }: JosPanelProps) => {
       );
    }
 
-   function renderJoMember(member: member, index: number) {
+   function renderJoMember(member: member, index: number): JSX.Element {
       const detailedJoMember = (
          <Grid container spacing={0}>
             <Grid item xs={6} justifyContent="center">
@@ -209,7 +214,7 @@ const JosPanel = ({ jos, setJos }: JosPanelProps) => {
                      <IconButton
                         onClick={() => {
                            setClickedCopyJos(true);
-                           josToClipboard();
+                           josToClipboard(jos);
                         }}
                      >
                         <ContentCopy />
