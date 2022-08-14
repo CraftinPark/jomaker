@@ -89,46 +89,44 @@ const JosPanel = ({ jos, setJos }: JosPanelProps) => {
       const [clickedCopyJo, setClickedCopyJos] = useState<boolean>(false);
 
       return (
-         <Grid item xs={12} sm={6} lg={4}>
-            <Paper sx={{ m: 1, p: 1, backgroundColor: "lightblue" }}>
-               <Typography sx={{ color: "steelblue" }} variant="subtitle1">
-                  Jo {index + 1}
-               </Typography>
-               <Droppable droppableId={index.toString()}>
-                  {(provided, snapshot) => (
-                     <div ref={provided.innerRef}>
-                        {jo.map((member, index) => renderJoMember(member, index))}
-                        {provided.placeholder}
-                     </div>
-                  )}
-               </Droppable>
-               <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-                  <ClickAwayListener onClickAway={() => setClickedCopyJos(false)}>
-                     <Tooltip
-                        PopperProps={{
-                           disablePortal: true,
+         <Paper sx={{ m: 1, p: 1, backgroundColor: "lightblue" }}>
+            <Typography sx={{ color: "steelblue" }} variant="subtitle1">
+               Jo {index + 1}
+            </Typography>
+            <Droppable droppableId={index.toString()}>
+               {(provided, snapshot) => (
+                  <div ref={provided.innerRef}>
+                     {jo.map((member, index) => renderJoMember(member, index))}
+                     {provided.placeholder}
+                  </div>
+               )}
+            </Droppable>
+            <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+               <ClickAwayListener onClickAway={() => setClickedCopyJos(false)}>
+                  <Tooltip
+                     PopperProps={{
+                        disablePortal: true,
+                     }}
+                     open={clickedCopyJo}
+                     disableFocusListener
+                     disableHoverListener
+                     disableTouchListener
+                     title="Copied Jo!"
+                     arrow
+                  >
+                     <IconButton
+                        onClick={() => {
+                           setClickedCopyJos(true);
+                           joToClipboard(jo);
                         }}
-                        open={clickedCopyJo}
-                        disableFocusListener
-                        disableHoverListener
-                        disableTouchListener
-                        title="Copied Jo!"
-                        arrow
+                        sx={{ p: 0.5 }}
                      >
-                        <IconButton
-                           onClick={() => {
-                              setClickedCopyJos(true);
-                              joToClipboard(jo);
-                           }}
-                           sx={{ p: 0.5 }}
-                        >
-                           <ContentCopy fontSize="small" />
-                        </IconButton>
-                     </Tooltip>
-                  </ClickAwayListener>
-               </Box>
-            </Paper>
-         </Grid>
+                        <ContentCopy fontSize="small" />
+                     </IconButton>
+                  </Tooltip>
+               </ClickAwayListener>
+            </Box>
+         </Paper>
       );
    }
 
@@ -187,7 +185,9 @@ const JosPanel = ({ jos, setJos }: JosPanelProps) => {
          <DragDropContext onDragEnd={onDragEnd}>
             <Grid container minHeight={150}>
                {jos.map((jo, index) => (
-                  <RenderJo key={index} jo={jo} index={index} />
+                  <Grid key={index} item xs={12} sm={6} lg={4}>
+                     <RenderJo jo={jo} index={index} />
+                  </Grid>
                ))}
             </Grid>
             <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
