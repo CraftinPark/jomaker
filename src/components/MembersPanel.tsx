@@ -50,7 +50,7 @@ const MembersPanel = ({ members, setMembers }: MembersPanelProps) => {
                <Box sx={tableHeaderCell} width="6%"></Box>
             </Box>
             {members.map((member, index) => (
-               <Box sx={{ display: "flex", backgroundColor: member.active ? "lightgreen" : "white" }}>
+               <Box key={member.id} sx={{ display: "flex", backgroundColor: member.active ? "lightgreen" : "white" }}>
                   <Box sx={tableCell} width="24.5%">
                      <button
                         style={{

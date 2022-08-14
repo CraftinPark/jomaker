@@ -119,8 +119,11 @@ function leaderScore(jo: member[]): number {
    for (let i = 0; i < jo.length; i++) {
       if (jo[i].leader === true) numLeaders++;
    }
-   if (numLeaders > 0) return numLeaders - 1;
-   else return 1;
+   if (numLeaders === 0) return 1;
+   else {
+      let abs = Math.abs(numLeaders);
+      return (abs / 2) * (abs + 1) * (abs / numLeaders) - 1 || 0;
+   }
 }
 
 function inclusionScore(jo: member[], inclusionList: string[][]): number {

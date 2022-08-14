@@ -3,7 +3,7 @@ import { AppBar, Box, Grid, IconButton, Toolbar, Typography } from "@mui/materia
 import { GitHub } from "@mui/icons-material";
 
 import { member } from "./util/types";
-import { createDiversifiedJos, turntableAssign, calculateTotalScore } from "./util/joMaker";
+import { createDiversifiedJos, turntableAssign } from "./util/joMaker";
 
 import MembersPanel from "./components/MembersPanel";
 import JosPanel from "./components/JosPanel";
@@ -63,7 +63,6 @@ function App() {
       if (useAlgorithm) jos = createDiversifiedJos(numJos, activeMems, incList, excList);
       else jos = turntableAssign(numJos, activeMems);
       setJos(jos);
-      console.log(calculateTotalScore(jos, incList, excList));
    }
 
    return (

@@ -187,7 +187,7 @@ const JosPanel = ({ jos, setJos }: JosPanelProps) => {
          <DragDropContext onDragEnd={onDragEnd}>
             <Grid container minHeight={150}>
                {jos.map((jo, index) => (
-                  <RenderJo jo={jo} index={index} />
+                  <RenderJo key={index} jo={jo} index={index} />
                ))}
             </Grid>
             <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
