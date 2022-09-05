@@ -1,43 +1,36 @@
 import { GitHub } from "@mui/icons-material";
-import {
-   AppBar,
-   Box,
-   Button,
-   Card,
-   Container,
-   IconButton,
-   TextField,
-   Toolbar,
-   Typography,
-} from "@mui/material";
+import { AppBar, Box, Button, Card, Container, IconButton, TextField, Toolbar, Typography } from "@mui/material";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-function Login({ setUser, setLoggedIn }: { setUser: any; setLoggedIn: any }) {
+function Register() {
    const navigate = useNavigate();
    const [username, setUsername] = useState<string>("");
    const [password, setPassword] = useState<string>("");
+   const [confirmPassword, setConfirmPassword] = useState<string>("");
 
-   async function attemptLogin(event: any) {
+   async function attemptRegisterUser(event: any) {
       event.preventDefault();
-      const response = await fetch("/api/jomaker/login", {
-         method: "POST",
-         headers: {
-            "Content-Type": "application/json",
-         },
-         body: JSON.stringify({
-            username: username,
-            password: password,
-         }),
-      });
 
-      const data = await response.json();
-      if (data.status === "error") console.log("there was an error");
-      else if (data.status === "ok") {
-         console.log(data.user);
-         setUser(data.user);
-         setLoggedIn(true);
-         navigate("/jomaker/app");
+      if (password !== confirmPassword) {
+         // not same password error
+      } else {
+         const response = await fetch("/api/jomaker/register", {
+            method: "POST",
+            headers: {
+               "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+               username: username,
+               password: password,
+            }),
+         });
+         const data = await response.json();
+         if (data.status === "error") console.log("there was an error");
+         else if (data.status === "ok") {
+            console.log(data.user);
+            navigate("/jomaker/login");
+         }
       }
    }
 
@@ -71,8 +64,8 @@ function Login({ setUser, setLoggedIn }: { setUser: any; setLoggedIn: any }) {
                   alignItems: "center",
                }}
             >
-               <Typography variant="h6">Log in to JoMaker</Typography>
-               <form onSubmit={(e) => attemptLogin(e)}>
+               <Typography variant="h6">Register User for JoMaker</Typography>
+               <form onSubmit={(e) => attemptRegisterUser(e)}>
                   <TextField
                      required
                      label="username"
@@ -92,17 +85,26 @@ function Login({ setUser, setLoggedIn }: { setUser: any; setLoggedIn: any }) {
                      sx={{ mt: "10px" }}
                      onChange={(e) => setPassword(e.target.value)}
                   />
+                  <TextField
+                     required
+                     type="password"
+                     label="confirm password"
+                     variant="outlined"
+                     size="small"
+                     fullWidth
+                     sx={{ mt: "10px" }}
+                     onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
                   <Button variant="contained" sx={{ mt: "10px", mb: "10px" }} type="submit">
-                     Log in
+                     Register
                   </Button>
                </form>
 
-               <Link to="/jomaker/register">Create an account</Link>
-               <Link to="/jomaker/offline">Use Offline Version</Link>
+               <Link to="/jomaker/login">use existing account</Link>
             </Card>
          </Container>
       </Box>
    );
 }
 
-export default Login;
+export default Register;
