@@ -12,14 +12,17 @@ type MembersPanelProps = {
 
 const MembersPanel = ({ members, setMembers }: MembersPanelProps) => {
    const [name, setName] = useState<string>("");
-   const [kName, setKName] = useState<string>("");
+   const [secondaryName, setSecondaryName] = useState<string>("");
    const [sex, setSex] = useState<sex>("male");
    const [year, setYear] = useState<number>(2000);
    const [leader, setLeader] = useState<boolean>(false);
 
    function addMember(): void {
-      if (!name || !kName || !sex || !year || leader === undefined) return;
-      setMembers((current) => [...current, { id: uuidv4(), name, kName: kName, sex, year, leader, active: true }]);
+      if (!name || !sex || !year || leader === undefined) return;
+      setMembers((current) => [
+         ...current,
+         { id: uuidv4(), name, secondaryName: secondaryName, sex, year, leader, active: true },
+      ]);
    }
 
    function removeMember(index: number): void {
@@ -36,7 +39,7 @@ const MembersPanel = ({ members, setMembers }: MembersPanelProps) => {
                   <Typography>Name</Typography>
                </Box>
                <Box sx={tableHeaderCell} width="24.5%">
-                  <Typography>이름</Typography>
+                  <Typography>Alt name</Typography>
                </Box>
                <Box sx={tableHeaderCell} width="15%">
                   <Typography>Sex</Typography>
@@ -100,7 +103,7 @@ const MembersPanel = ({ members, setMembers }: MembersPanelProps) => {
                            });
                         }}
                      >
-                        <Typography>{member.kName}</Typography>
+                        <Typography>{member.secondaryName}</Typography>
                      </button>
                   </Box>
                   <Box sx={tableCell} width="15%">
@@ -138,10 +141,10 @@ const MembersPanel = ({ members, setMembers }: MembersPanelProps) => {
             <Box sx={tableFormCell} width="24.5%">
                <TextField
                   required
-                  placeholder="이름"
+                  placeholder="Alt name"
                   size="small"
-                  value={kName}
-                  onChange={(e: any) => setKName(e.target.value)}
+                  value={secondaryName}
+                  onChange={(e: any) => setSecondaryName(e.target.value)}
                />
             </Box>
             <Box sx={tableFormCell} width="15%">

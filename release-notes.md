@@ -4,7 +4,21 @@ All notable changes are documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 
+## [1.1.1]
+
+### Added:
+
+- Login and Register pages have relevant error messages
+
+### Changed:
+
+- Korean name changed to Alt name.
+- Secondary name is no longer required for member creation.
+
 ## [1.1.0]
+
+
+### Added:
 
 - Login and Register functionality added. Communicates with backend to make mongodb queries
 - Saves member list and previously created Jos and other information for each account.

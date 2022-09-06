@@ -1,4 +1,4 @@
-import { Box, Button, Card, Container, TextField, Typography } from "@mui/material";
+import { Alert, Box, Button, Card, Container, TextField, Typography } from "@mui/material";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Appbar from "./Appbar";
@@ -8,12 +8,13 @@ function Register() {
    const [username, setUsername] = useState<string>("");
    const [password, setPassword] = useState<string>("");
    const [confirmPassword, setConfirmPassword] = useState<string>("");
+   const [alertMessage, setAlertMessage] = useState<string>("");
 
    async function attemptRegisterUser(event: any) {
       event.preventDefault();
 
       if (password !== confirmPassword) {
-         // not same password error
+         setAlertMessage("Passwords do not match, please try again.");
       } else {
          const response = await fetch("/api/jomaker/register", {
             method: "POST",
@@ -26,11 +27,23 @@ function Register() {
             }),
          });
          const data = await response.json();
-         if (data.status === "error") console.log("there was an error");
+         if (data.status === "error") setAlertMessage(data.message);
          else if (data.status === "ok") {
             console.log(data.user);
             navigate("/jomaker/login");
          }
+      }
+   }
+
+   function alert() {
+      if (alertMessage) {
+         return (
+            <Alert severity="error" sx={{ mt: "10px", width: "90%" }}>
+               {alertMessage}
+            </Alert>
+         );
+      } else {
+         return <></>;
       }
    }
 
@@ -96,6 +109,7 @@ function Register() {
                <Link to="/jomaker/login" style={{ width: "100%", display: "flex", justifyContent: "flex-end" }}>
                   <Typography variant="subtitle2">use existing account</Typography>
                </Link>
+               {alert()}
             </Card>
          </Container>
       </Box>

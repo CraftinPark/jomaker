@@ -21,7 +21,7 @@ type JosPanelProps = {
 
 const JosPanel = ({ jos, setJos }: JosPanelProps) => {
    const [showProperties, setShowProperties] = useState<boolean>(false);
-   const [useKoreanNames, setUseKoreanNames] = useState<boolean>(false);
+   const [useSecondaryNames, setUseSecondaryNames] = useState<boolean>(false);
    const [clickedCopyJos, setClickedCopyJos] = useState<boolean>(false);
 
    // react-beautiful-dnd functions: reorder, move, onDragEnd
@@ -75,13 +75,13 @@ const JosPanel = ({ jos, setJos }: JosPanelProps) => {
 
    function josToClipboard(jos: member[][]): void {
       let josNames: string = jos
-         .map((jo) => jo.map((member) => (useKoreanNames ? member.kName : member.name) + " ").join("\n"))
+         .map((jo) => jo.map((member) => (useSecondaryNames ? member.secondaryName : member.name) + " ").join("\n"))
          .join("\n\n");
       navigator.clipboard.writeText(josNames);
    }
 
    function joToClipboard(jo: member[]): void {
-      let joNames: string = jo.map((member) => (useKoreanNames ? member.kName : member.name) + " ").join("\n");
+      let joNames: string = jo.map((member) => (useSecondaryNames ? member.secondaryName : member.name) + " ").join("\n");
       navigator.clipboard.writeText(joNames);
    }
 
@@ -134,7 +134,7 @@ const JosPanel = ({ jos, setJos }: JosPanelProps) => {
       const detailedJoMember = (
          <Grid container spacing={0}>
             <Grid item xs={6} justifyContent="center">
-               <Typography>{useKoreanNames ? member.kName : member.name}</Typography>
+               <Typography>{useSecondaryNames ? member.secondaryName : member.name}</Typography>
             </Grid>
             <Grid item xs={2} sx={{ flexGrow: 1, textAlign: "center" }}>
                <Typography style={{ color: member.sex === "male" ? "blue" : "DeepPink" }}>
@@ -152,7 +152,7 @@ const JosPanel = ({ jos, setJos }: JosPanelProps) => {
 
       const simpleJoMember = (
          <Box>
-            <Typography>{useKoreanNames ? member.kName : member.name}</Typography>
+            <Typography>{useSecondaryNames ? member.secondaryName : member.name}</Typography>
          </Box>
       );
 
@@ -192,8 +192,8 @@ const JosPanel = ({ jos, setJos }: JosPanelProps) => {
             </Grid>
             <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
                <FormControlLabel
-                  control={<Switch value={useKoreanNames} onChange={(e: any) => setUseKoreanNames(e.target.checked)} />}
-                  label="Use Korean Names"
+                  control={<Switch value={useSecondaryNames} onChange={(e: any) => setUseSecondaryNames(e.target.checked)} />}
+                  label="Use Alternate Names"
                />
                <FormControlLabel
                   control={<Switch value={showProperties} onChange={(e: any) => setShowProperties(e.target.checked)} />}

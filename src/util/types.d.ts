@@ -3,7 +3,7 @@ export type sex = "male" | "female";
 export type member = {
   id: string;
   name: string;
-  kName: string;
+  secondaryName: string;
   year: number;
   sex: sex;
   leader: boolean;
