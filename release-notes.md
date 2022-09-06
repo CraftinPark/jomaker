@@ -4,6 +4,11 @@ All notable changes are documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 
+## [1.1.0]
+
+- Login and Register functionality added. Communicates with backend to make mongodb queries
+- Saves member list and previously created Jos and other information for each account.
+
 ## [1.0.3]
 
 ### Changed:

@@ -1,7 +1,7 @@
-import { GitHub } from "@mui/icons-material";
-import { AppBar, Box, Button, Card, Container, IconButton, TextField, Toolbar, Typography } from "@mui/material";
+import { Box, Button, Card, Container, TextField, Typography } from "@mui/material";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import Appbar from "./Appbar";
 
 function Register() {
    const navigate = useNavigate();
@@ -36,22 +36,7 @@ function Register() {
 
    return (
       <Box sx={{ flexGrow: 1, backgroundColor: "#a9a9a9" }}>
-         <AppBar position="static">
-            <Toolbar variant="dense">
-               <Typography variant="h4" color="inherit" component="div" paddingRight={2}>
-                  Jo Maker
-               </Typography>
-               <Typography variant="h6" color="inherit" component="div" sx={{ flexGrow: 1 }}>
-                  unbiased diversified team generator
-               </Typography>
-               <Typography variant="h6" color="inherit">
-                  v{process.env.REACT_APP_VERSION}
-               </Typography>
-               <IconButton onClick={() => (window.location.href = "https://github.com/CraftinPark/jo")} sx={{ ml: 1 }}>
-                  <GitHub sx={{ color: "white" }} />
-               </IconButton>
-            </Toolbar>
-         </AppBar>
+         <Appbar offline={false} loggedIn={false} username={""}></Appbar>
          <Container sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "90vh" }}>
             <Card
                sx={{
@@ -65,7 +50,15 @@ function Register() {
                }}
             >
                <Typography variant="h6">Register User for JoMaker</Typography>
-               <form onSubmit={(e) => attemptRegisterUser(e)}>
+               <form
+                  onSubmit={(e) => attemptRegisterUser(e)}
+                  style={{
+                     display: "flex",
+                     flexDirection: "column",
+                     justifyContent: "center",
+                     width: "100%",
+                  }}
+               >
                   <TextField
                      required
                      label="username"
@@ -100,7 +93,9 @@ function Register() {
                   </Button>
                </form>
 
-               <Link to="/jomaker/login">use existing account</Link>
+               <Link to="/jomaker/login" style={{ width: "100%", display: "flex", justifyContent: "flex-end" }}>
+                  <Typography variant="subtitle2">use existing account</Typography>
+               </Link>
             </Card>
          </Container>
       </Box>

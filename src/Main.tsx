@@ -6,22 +6,19 @@ import { member } from "./util/types";
 import OfflineApp from "./OfflineApp";
 import Register from "./Register";
 
+export type user = {
+   _id: string;
+   username: string;
+   password: string;
+   memberList: member[];
+   previousJos: member[][];
+   settings: any;
+};
+
 function Main() {
-   const [loggedIn, setLoggedIn] = useState<boolean>(false);
-   const [user, setUser] = useState<{
-      _id: string;
-      username: string;
-      password: string;
-      memberList: member[];
-      previousJos: member[][];
-      settings: any;
-   }>({
-      _id: "",
-      username: "",
-      password: "",
-      memberList: [],
-      previousJos: [],
-      settings: {},
+   const [user, setUser] = useState<user | false>(() => {
+      const localData = localStorage.getItem("user");
+      return localData !== "false" && localData ? JSON.parse(localData) : false;
    });
 
    return (
@@ -29,13 +26,13 @@ function Main() {
          <Routes>
             <Route
                path="/jomaker"
-               element={loggedIn ? <Navigate replace to="/jomaker/app" /> : <Navigate replace to="/jomaker/login" />}
+               element={user ? <Navigate replace to="/jomaker/app" /> : <Navigate replace to="/jomaker/login" />}
             />
-            <Route path="/jomaker/login" element={<Login setUser={setUser} setLoggedIn={setLoggedIn} />} />
+            <Route path="/jomaker/login" element={<Login setUser={setUser} />} />
             <Route path="/jomaker/register" element={<Register />} />
             <Route
                path="/jomaker/app"
-               element={loggedIn ? <App user={user}  setLoggedIn={setLoggedIn}/> : <Navigate replace to="/jomaker/login" />}
+               element={user ? <App user={user} /> : <Navigate replace to="/jomaker/login" />}
             />
             <Route path="/jomaker/offline" element={<OfflineApp />} />
          </Routes>

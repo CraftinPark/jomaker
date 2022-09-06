@@ -1,22 +1,17 @@
-import { GitHub } from "@mui/icons-material";
-import {
-   AppBar,
-   Box,
-   Button,
-   Card,
-   Container,
-   IconButton,
-   TextField,
-   Toolbar,
-   Typography,
-} from "@mui/material";
-import { useState } from "react";
+import { Box, Button, Card, Container, TextField, Typography } from "@mui/material";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import Appbar from "./Appbar";
 
-function Login({ setUser, setLoggedIn }: { setUser: any; setLoggedIn: any }) {
+function Login({ setUser }: { setUser: any }) {
    const navigate = useNavigate();
    const [username, setUsername] = useState<string>("");
    const [password, setPassword] = useState<string>("");
+
+   useEffect(() => {
+      setUser(false);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+   }, []);
 
    async function attemptLogin(event: any) {
       event.preventDefault();
@@ -36,29 +31,14 @@ function Login({ setUser, setLoggedIn }: { setUser: any; setLoggedIn: any }) {
       else if (data.status === "ok") {
          console.log(data.user);
          setUser(data.user);
-         setLoggedIn(true);
+         localStorage.setItem("user", JSON.stringify(data.user));
          navigate("/jomaker/app");
       }
    }
 
    return (
       <Box sx={{ flexGrow: 1, backgroundColor: "#a9a9a9" }}>
-         <AppBar position="static">
-            <Toolbar variant="dense">
-               <Typography variant="h4" color="inherit" component="div" paddingRight={2}>
-                  Jo Maker
-               </Typography>
-               <Typography variant="h6" color="inherit" component="div" sx={{ flexGrow: 1 }}>
-                  unbiased diversified team generator
-               </Typography>
-               <Typography variant="h6" color="inherit">
-                  v{process.env.REACT_APP_VERSION}
-               </Typography>
-               <IconButton onClick={() => (window.location.href = "https://github.com/CraftinPark/jo")} sx={{ ml: 1 }}>
-                  <GitHub sx={{ color: "white" }} />
-               </IconButton>
-            </Toolbar>
-         </AppBar>
+         <Appbar offline={false} loggedIn={false} username={""}></Appbar>
          <Container sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "90vh" }}>
             <Card
                sx={{
@@ -72,7 +52,15 @@ function Login({ setUser, setLoggedIn }: { setUser: any; setLoggedIn: any }) {
                }}
             >
                <Typography variant="h6">Log in to JoMaker</Typography>
-               <form onSubmit={(e) => attemptLogin(e)}>
+               <form
+                  onSubmit={(e) => attemptLogin(e)}
+                  style={{
+                     display: "flex",
+                     flexDirection: "column",
+                     justifyContent: "center",
+                     width: "100%",
+                  }}
+               >
                   <TextField
                      required
                      label="username"
@@ -97,8 +85,12 @@ function Login({ setUser, setLoggedIn }: { setUser: any; setLoggedIn: any }) {
                   </Button>
                </form>
 
-               <Link to="/jomaker/register">Create an account</Link>
-               <Link to="/jomaker/offline">Use Offline Version</Link>
+               <Link to="/jomaker/register" style={{ width: "100%", display: "flex", justifyContent: "flex-end" }}>
+                  <Typography variant="subtitle2">Create an account</Typography>
+               </Link>
+               <Link to="/jomaker/offline" style={{ width: "100%", display: "flex", justifyContent: "flex-end" }}>
+                  <Typography variant="subtitle2">Use Offline Version</Typography>
+               </Link>
             </Card>
          </Container>
       </Box>
