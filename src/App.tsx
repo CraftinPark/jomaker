@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Box, Grid } from "@mui/material";
 
 import { member } from "./util/types";
-import { createDiversifiedJos, turntableAssign } from "./util/joMaker";
+import { createDiversifiedJos, shuffleMembers, turntableAssign } from "./util/joMaker";
 
 import MembersPanel from "./components/MembersPanel";
 import JosPanel from "./components/JosPanel";
@@ -65,7 +65,7 @@ function App({ user }: { user: user }) {
       const excList: string[][] = parseConditionList(exclusionList);
       let jos: member[][] = [];
       if (useAlgorithm) jos = createDiversifiedJos(numJos, activeMems, incList, excList);
-      else jos = turntableAssign(numJos, activeMems);
+      else jos = turntableAssign(numJos, shuffleMembers(activeMems));
       setJos(jos);
 
       // post request inclusion lists
