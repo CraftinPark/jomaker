@@ -4,6 +4,13 @@ All notable changes are documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 
+## [1.1.3]
+
+### Changed:
+
+- Fix: Reloading webpage does not wipe changes
+- Fix: Alternative names do not disappear
+
 ## [1.1.2]
 
 ### Changed:

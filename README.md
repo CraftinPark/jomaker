@@ -1,6 +1,6 @@
 # Jo Maker
 
-## v1.1.2
+## v1.1.3
 
 ## Create unbiased, diversified teams made for recurring events
 
