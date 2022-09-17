@@ -1,7 +1,7 @@
 import Login from "./Login";
 import App from "./App";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { member } from "./util/types";
 import OfflineApp from "./OfflineApp";
 import Register from "./Register";
@@ -16,9 +16,17 @@ export type user = {
 };
 
 function Main() {
+   useEffect(() => {
+      const getPreservedUser = async () => {};
+
+      getPreservedUser();
+   }, []);
+
    const [user, setUser] = useState<user | false>(() => {
       const localData = localStorage.getItem("user");
       return localData !== "false" && localData ? JSON.parse(localData) : false;
+
+      // attempt login
    });
 
    return (

@@ -19,18 +19,6 @@ function App({ user }: { user: user }) {
    const [exclusionList, setExclusionList] = useState<string>(user.settings.exclusionList);
 
    useEffect(() => {
-      console.log(user);
-
-      console.log(
-         JSON.stringify({
-            username: user.username,
-            memberList: members,
-            previousJos: jos,
-            inclusionList: inclusionList,
-            exclusionList: exclusionList,
-         })
-      );
-
       fetch("/api/jomaker/update-user", {
          method: "POST",
          headers: {
@@ -44,6 +32,21 @@ function App({ user }: { user: user }) {
             exclusionList: exclusionList,
          }),
       });
+
+      console.log("successfully sent post request ", user.username);
+
+      localStorage.setItem(
+         "user",
+         JSON.stringify({
+            username: user.username,
+            memberList: members,
+            previousJos: jos,
+            inclusionList: inclusionList,
+            exclusionList: exclusionList,
+            settings: user.settings,
+         })
+      );
+
       // eslint-disable-next-line react-hooks/exhaustive-deps
    }, [jos, inclusionList, exclusionList, members]);
 
