@@ -1,6 +1,6 @@
 # Jo Maker
 
-## v1.1.3
+## v1.1.4
 
 ## Create unbiased, diversified teams made for recurring events
 
@@ -9,6 +9,8 @@ currently deployed at https://jomaker.vercel.app/
 ### Features:
 
 -  Activate/Deactivate members
+-  Edit members
+-  Sort members
 -  Drag and Drop to modify generated jos
 -  Copy jo member names (separated by new line for powerpoint)
 -  Select # of jos
