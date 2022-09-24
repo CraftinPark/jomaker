@@ -11,7 +11,7 @@ developed by CraftinPark
 
 ## Create unbiased, diversified teams made for recurring events
 
-currently deployed at https://jomaker.vercel.app/
+currently deployed at www.craftinpark.ca
 
 ### Features:
 
