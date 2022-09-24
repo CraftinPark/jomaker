@@ -1,6 +1,15 @@
-import React, { useState, Dispatch, SetStateAction } from "react";
+import React, { useState, Dispatch, SetStateAction, useEffect } from "react";
 import { Box, Typography, Paper, TextField, Select, MenuItem, Button, IconButton } from "@mui/material";
-import { Delete, Add, Person, CheckBox, Clear, CheckBoxOutlineBlank } from "@mui/icons-material";
+import {
+   ArrowDropDown,
+   ArrowDropUp,
+   Delete,
+   Add,
+   Person,
+   CheckBox,
+   Clear,
+   CheckBoxOutlineBlank,
+} from "@mui/icons-material";
 import { v4 as uuidv4 } from "uuid";
 import { sex, member } from "../util/types";
 import { tableCell, tableFormCell, tableHeaderCell } from "./styles";
@@ -10,12 +19,27 @@ type MembersPanelProps = {
    setMembers: Dispatch<SetStateAction<member[]>>;
 };
 
+enum SortFilter {
+   NameDescending,
+   NameAscending,
+   SecondaryNameDescending,
+   SecondaryNameAscending,
+   SexFemale,
+   SexMale,
+   YearDescending,
+   YearAscending,
+   LeaderFalse,
+   LeaderTrue,
+   None,
+}
+
 const MembersPanel = ({ members, setMembers }: MembersPanelProps) => {
    const [name, setName] = useState<string>("");
    const [secondaryName, setSecondaryName] = useState<string>("");
    const [sex, setSex] = useState<sex>("male");
    const [year, setYear] = useState<number>(2000);
    const [leader, setLeader] = useState<boolean>(false);
+   const [sort, setSort] = useState<SortFilter>(SortFilter.None);
 
    function addMember(): void {
       if (!name || !sex || !year || leader === undefined) return;
@@ -56,25 +80,284 @@ const MembersPanel = ({ members, setMembers }: MembersPanelProps) => {
       });
    }
 
+   useEffect(() => {
+      function sortMembers() {
+         switch (sort) {
+            case SortFilter.NameDescending:
+               setMembers((current) => {
+                  let newMembers = [...current];
+                  newMembers.sort((a, b) => {
+                     let fa = a.name.toLowerCase(),
+                        fb = b.name.toLowerCase();
+                     if (fa < fb) return -1;
+                     if (fa > fb) return 1;
+                     return 0;
+                  });
+                  return newMembers;
+               });
+               break;
+            case SortFilter.NameAscending:
+               setMembers((current) => {
+                  let newMembers = [...current];
+                  newMembers.sort((a, b) => {
+                     let fa = a.name.toLowerCase(),
+                        fb = b.name.toLowerCase();
+                     if (fa < fb) return 1;
+                     if (fa > fb) return -1;
+                     return 0;
+                  });
+                  return newMembers;
+               });
+               break;
+            case SortFilter.SecondaryNameDescending:
+               setMembers((current) => {
+                  let newMembers = [...current];
+                  newMembers.sort((a, b) => {
+                     let fa = a.secondaryName,
+                        fb = b.secondaryName;
+                     if (fa < fb) return -1;
+                     if (fa > fb) return 1;
+                     return 0;
+                  });
+                  return newMembers;
+               });
+               break;
+            case SortFilter.SecondaryNameAscending:
+               setMembers((current) => {
+                  let newMembers = [...current];
+                  newMembers.sort((a, b) => {
+                     let fa = a.secondaryName,
+                        fb = b.secondaryName;
+                     if (fa < fb) return 1;
+                     if (fa > fb) return -1;
+                     return 0;
+                  });
+                  return newMembers;
+               });
+               break;
+            case SortFilter.SexMale:
+               setMembers((current) => {
+                  let newMembers = [...current];
+                  newMembers.sort((a, b) => {
+                     let sa = a.sex === "male" ? 1 : 0,
+                        sb = b.sex === "male" ? 1 : 0;
+                     return sa - sb;
+                  });
+                  return newMembers;
+               });
+               break;
+            case SortFilter.SexFemale:
+               setMembers((current) => {
+                  let newMembers = [...current];
+                  newMembers.sort((a, b) => {
+                     let sa = a.sex === "female" ? 1 : 0,
+                        sb = b.sex === "female" ? 1 : 0;
+                     return sa - sb;
+                  });
+                  return newMembers;
+               });
+               break;
+            case SortFilter.YearDescending:
+               setMembers((current) => {
+                  let newMembers = [...current];
+                  newMembers.sort((a, b) => a.year - b.year);
+                  return newMembers;
+               });
+               break;
+            case SortFilter.YearAscending:
+               setMembers((current) => {
+                  let newMembers = [...current];
+                  newMembers.sort((a, b) => b.year - a.year);
+                  return newMembers;
+               });
+               break;
+            case SortFilter.LeaderTrue:
+               setMembers((current) => {
+                  let newMembers = [...current];
+                  newMembers.sort((a, b) => {
+                     let sa = !a.leader ? 1 : 0,
+                        sb = !b.leader ? 1 : 0;
+                     return sa - sb;
+                  });
+                  return newMembers;
+               });
+               break;
+            case SortFilter.LeaderFalse:
+               setMembers((current) => {
+                  let newMembers = [...current];
+                  newMembers.sort((a, b) => {
+                     let sa = a.leader ? 1 : 0,
+                        sb = b.leader ? 1 : 0;
+                     return sa - sb;
+                  });
+                  return newMembers;
+               });
+               break;
+         }
+      }
+      sortMembers();
+   }, [setMembers, sort]);
+
    function renderMembers(): JSX.Element {
       return (
          <Box sx={{ mt: 1, mb: 2 }}>
             <Box sx={{ display: "flex" }}>
                <Box sx={tableHeaderCell} width="6%"></Box>
                <Box sx={tableHeaderCell} width="23.5%">
-                  <Typography>Name</Typography>
+                  <button
+                     style={{
+                        background: "none",
+                        color: "inherit",
+                        border: "none",
+                        padding: 0,
+                        font: "inherit",
+                        cursor: "pointer",
+                        outline: "none",
+                        width: "100%",
+                        height: "100%",
+                        display: "flex",
+                        justifyContent: "center",
+                     }}
+                     onClick={() => {
+                        if (sort === SortFilter.NameAscending) setSort(SortFilter.None);
+                        else if (sort === SortFilter.NameDescending) setSort(SortFilter.NameAscending);
+                        else setSort(SortFilter.NameDescending);
+                     }}
+                  >
+                     <Typography>Name</Typography>
+                     {sort === SortFilter.NameAscending ? (
+                        <ArrowDropUp />
+                     ) : sort === SortFilter.NameDescending ? (
+                        <ArrowDropDown />
+                     ) : (
+                        ""
+                     )}
+                  </button>
                </Box>
                <Box sx={tableHeaderCell} width="23.5%">
-                  <Typography>Alt name</Typography>
+                  <button
+                     style={{
+                        background: "none",
+                        color: "inherit",
+                        border: "none",
+                        padding: 0,
+                        font: "inherit",
+                        cursor: "pointer",
+                        outline: "none",
+                        width: "100%",
+                        height: "100%",
+                        display: "flex",
+                        justifyContent: "center",
+                     }}
+                     onClick={() => {
+                        if (sort === SortFilter.SecondaryNameAscending) setSort(SortFilter.None);
+                        else if (sort === SortFilter.SecondaryNameDescending)
+                           setSort(SortFilter.SecondaryNameAscending);
+                        else setSort(SortFilter.SecondaryNameDescending);
+                     }}
+                  >
+                     <Typography>2nd Name</Typography>
+                     {sort === SortFilter.SecondaryNameAscending ? (
+                        <ArrowDropUp />
+                     ) : sort === SortFilter.SecondaryNameDescending ? (
+                        <ArrowDropDown />
+                     ) : (
+                        ""
+                     )}
+                  </button>
                </Box>
                <Box sx={tableHeaderCell} width="14%">
-                  <Typography>Sex</Typography>
+                  <button
+                     style={{
+                        background: "none",
+                        color: "inherit",
+                        border: "none",
+                        padding: 0,
+                        font: "inherit",
+                        cursor: "pointer",
+                        outline: "none",
+                        width: "100%",
+                        height: "100%",
+                        display: "flex",
+                        justifyContent: "center",
+                     }}
+                     onClick={() => {
+                        if (sort === SortFilter.SexFemale) setSort(SortFilter.None);
+                        else if (sort === SortFilter.SexMale) setSort(SortFilter.SexFemale);
+                        else setSort(SortFilter.SexMale);
+                     }}
+                  >
+                     <Typography>Sex</Typography>
+                     {sort === SortFilter.SexFemale ? (
+                        <ArrowDropUp />
+                     ) : sort === SortFilter.SexMale ? (
+                        <ArrowDropDown />
+                     ) : (
+                        ""
+                     )}
+                  </button>
                </Box>
                <Box sx={tableHeaderCell} width="14%">
-                  <Typography>Year</Typography>
+                  <button
+                     style={{
+                        background: "none",
+                        color: "inherit",
+                        border: "none",
+                        padding: 0,
+                        font: "inherit",
+                        cursor: "pointer",
+                        outline: "none",
+                        width: "100%",
+                        height: "100%",
+                        display: "flex",
+                        justifyContent: "center",
+                     }}
+                     onClick={() => {
+                        if (sort === SortFilter.YearAscending) setSort(SortFilter.None);
+                        else if (sort === SortFilter.YearDescending) setSort(SortFilter.YearAscending);
+                        else setSort(SortFilter.YearDescending);
+                     }}
+                  >
+                     <Typography>Year</Typography>
+                     {sort === SortFilter.YearAscending ? (
+                        <ArrowDropUp />
+                     ) : sort === SortFilter.YearDescending ? (
+                        <ArrowDropDown />
+                     ) : (
+                        ""
+                     )}
+                  </button>
                </Box>
                <Box sx={tableHeaderCell} width="14%">
-                  <Typography>Leader</Typography>
+                  <button
+                     style={{
+                        background: "none",
+                        color: "inherit",
+                        border: "none",
+                        padding: 0,
+                        font: "inherit",
+                        cursor: "pointer",
+                        outline: "none",
+                        width: "100%",
+                        height: "100%",
+                        display: "flex",
+                        justifyContent: "center",
+                     }}
+                     onClick={() => {
+                        if (sort === SortFilter.LeaderFalse) setSort(SortFilter.None);
+                        else if (sort === SortFilter.LeaderTrue) setSort(SortFilter.LeaderFalse);
+                        else setSort(SortFilter.LeaderTrue);
+                     }}
+                  >
+                     <Typography>Leader</Typography>
+                     {sort === SortFilter.LeaderFalse ? (
+                        <ArrowDropUp />
+                     ) : sort === SortFilter.LeaderTrue ? (
+                        <ArrowDropDown />
+                     ) : (
+                        ""
+                     )}
+                  </button>
                </Box>
                <Box sx={tableHeaderCell} width="5%"></Box>
             </Box>
