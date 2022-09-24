@@ -4,6 +4,13 @@ All notable changes are documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 
+## [1.1.4]
+
+### Added:
+
+- Member list entries are now fully editable. Changes are also reflected in real time in the calculated Jos.
+- Member list can now be sorted based on every property.
+
 ## [1.1.3]
 
 ### Changed:
