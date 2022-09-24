@@ -1,5 +1,5 @@
 export const tableHeaderCell = {
-  backgroundColor: "gray",
+  backgroundColor: "darkgrey",
   outlineStyle: "solid",
   display: "flex",
   justifyContent: "center",
