@@ -364,7 +364,7 @@ const MembersPanel = ({ members, setMembers }: MembersPanelProps) => {
             {members.map((member, index) => (
                <Box
                   key={member.id}
-                  sx={{ display: "flex", height: "37px", backgroundColor: member.active ? "lightgreen" : "white" }}
+                  sx={{ display: "flex", height: "37px", backgroundColor: member.active ? "palegreen" : "white" }}
                >
                   <Box sx={tableCell} width="6%">
                      <button
@@ -480,7 +480,7 @@ const MembersPanel = ({ members, setMembers }: MembersPanelProps) => {
                   </Box>
                   <Box sx={{ ...tableCell, backgroundColor: "gainsboro" }} width="5%">
                      <IconButton onClick={() => removeMember(index)}>
-                        <Delete />
+                        <Delete sx={{color: "#d11a2a"}}/>
                      </IconButton>
                   </Box>
                </Box>
