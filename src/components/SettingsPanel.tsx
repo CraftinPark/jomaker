@@ -11,6 +11,7 @@ type SettingsPanelProps = {
    exclusionList: string;
    setExclusionList: Dispatch<SetStateAction<string>>;
    createJos: () => void;
+   setDialogOpened: Dispatch<SetStateAction<boolean>>;
 };
 
 const SettingsPanel = ({
@@ -22,7 +23,8 @@ const SettingsPanel = ({
    setInclusionList,
    exclusionList,
    setExclusionList,
-   createJos
+   createJos,
+   setDialogOpened,
 }: SettingsPanelProps) => {
    return (
       <Paper sx={{ p: 2, backgroundColor: "Gainsboro" }}>
@@ -75,8 +77,11 @@ const SettingsPanel = ({
          </Typography>
          <Switch disabled /> */}
          <Divider light />
-         <Button sx={{ mt: 1, mr: 2 }} variant="contained" onClick={() => createJos()}>
+         <Button sx={{ mt: 1, mr: 1 }} variant="contained" onClick={() => createJos()}>
             Create New Jos
+         </Button>
+         <Button sx={{ mt: 1, backgroundColor: "limegreen" }} variant="contained" onClick={() => setDialogOpened(true)}>
+            Use Jos
          </Button>
       </Paper>
    );

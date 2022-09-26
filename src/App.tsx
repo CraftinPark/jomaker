@@ -9,6 +9,7 @@ import JosPanel from "./components/JosPanel";
 import SettingsPanel from "./components/SettingsPanel";
 import Appbar from "./Appbar";
 import { user } from "./Main";
+import JosDialog from "./JosDialog";
 
 function App({ user }: { user: user }) {
    const [members, setMembers] = useState<member[]>(user.memberList);
@@ -17,6 +18,7 @@ function App({ user }: { user: user }) {
    const [useAlgorithm, setUseAlgorithm] = useState<boolean>(true);
    const [inclusionList, setInclusionList] = useState<string>(user.settings.inclusionList);
    const [exclusionList, setExclusionList] = useState<string>(user.settings.exclusionList);
+   const [dialogOpened, setDialogOpened] = useState<boolean>(false);
 
    useEffect(() => {
       fetch("/api/jomaker/update-user", {
@@ -93,9 +95,11 @@ function App({ user }: { user: user }) {
                   exclusionList={exclusionList}
                   setExclusionList={setExclusionList}
                   createJos={createJos}
+                  setDialogOpened={setDialogOpened}
                />
             </Grid>
          </Grid>
+         <JosDialog dialogOpened={dialogOpened} setDialogOpened={setDialogOpened} jos={jos}/>
       </Box>
    );
 }

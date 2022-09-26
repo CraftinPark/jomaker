@@ -8,6 +8,7 @@ import { createDiversifiedJos, turntableAssign } from "./util/joMaker";
 import MembersPanel from "./components/MembersPanel";
 import JosPanel from "./components/JosPanel";
 import SettingsPanel from "./components/SettingsPanel";
+import JosDialog from "./JosDialog";
 
 function OfflineApp() {
    const [members, setMembers] = useState<member[]>(() => {
@@ -26,6 +27,8 @@ function OfflineApp() {
    const [exclusionList, setExclusionList] = useState<string>((): string => {
       return localStorage.getItem("exclusionList") ?? "";
    });
+
+   const [dialogOpened, setDialogOpened] = useState<boolean>(false);
 
    useEffect(() => {
       localStorage.setItem("members", JSON.stringify(members));
@@ -99,9 +102,11 @@ function OfflineApp() {
                   exclusionList={exclusionList}
                   setExclusionList={setExclusionList}
                   createJos={createJos}
+                  setDialogOpened={setDialogOpened}
                />
             </Grid>
          </Grid>
+         <JosDialog dialogOpened={dialogOpened} setDialogOpened={setDialogOpened} jos={jos} />
       </Box>
    );
 }
