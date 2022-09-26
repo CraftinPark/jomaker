@@ -36,11 +36,13 @@ function JosDialog({
       getBlobFromImageElement(clipRef.current!).then((blob) => copyBlobToClipboard(blob));
    };
 
-   const downloadScreenshot = (image: any, { name = "jos", extension = "jpg" } = {}) => {
-      const a = document.createElement("a");
-      a.href = image;
-      a.download = createFileName(extension, name);
-      a.click();
+   const downloadScreenshot = () => {
+      takeScreenShot(imgRef.current).then((image: any, { name = "jos", extension = "jpg" } = {}) => {
+         const a = document.createElement("a");
+         a.href = image;
+         a.download = createFileName(extension, name);
+         a.click();
+      });
    };
 
    useEffect(() => {
