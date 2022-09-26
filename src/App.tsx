@@ -9,7 +9,7 @@ import JosPanel from "./components/JosPanel";
 import SettingsPanel from "./components/SettingsPanel";
 import Appbar from "./Appbar";
 import { user } from "./Main";
-import JosDialog from "./JosDialog";
+import JosDialog from "./components/JosDialog";
 
 function App({ user }: { user: user }) {
    const [members, setMembers] = useState<member[]>(user.memberList);

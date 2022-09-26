@@ -8,7 +8,7 @@ import { createDiversifiedJos, turntableAssign } from "./util/joMaker";
 import MembersPanel from "./components/MembersPanel";
 import JosPanel from "./components/JosPanel";
 import SettingsPanel from "./components/SettingsPanel";
-import JosDialog from "./JosDialog";
+import JosDialog from "./components/JosDialog";
 
 function OfflineApp() {
    const [members, setMembers] = useState<member[]>(() => {

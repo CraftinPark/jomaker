@@ -2,7 +2,7 @@ import { Button, Dialog, Grid, Paper, Typography } from "@mui/material";
 import { CameraAlt, Download } from "@mui/icons-material";
 import { Box } from "@mui/system";
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
-import { member } from "./util/types";
+import { member } from "../util/types";
 // @ts-ignore
 import { useScreenshot, createFileName } from "use-react-screenshot";
 
