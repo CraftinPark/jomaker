@@ -8,7 +8,7 @@ import { createDiversifiedJos, turntableAssign } from "./util/joMaker";
 import MembersPanel from "./components/MembersPanel";
 import JosPanel from "./components/JosPanel";
 import SettingsPanel from "./components/SettingsPanel";
-import JosDialog from "./components/JosDialog";
+import UseJosDialog from "./components/UseJosDialog";
 
 function OfflineApp() {
    const [members, setMembers] = useState<member[]>(() => {
@@ -106,7 +106,7 @@ function OfflineApp() {
                />
             </Grid>
          </Grid>
-         <JosDialog dialogOpened={dialogOpened} setDialogOpened={setDialogOpened} jos={jos} />
+         <UseJosDialog dialogOpened={dialogOpened} setDialogOpened={setDialogOpened} jos={jos} />
       </Box>
    );
 }

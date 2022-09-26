@@ -17,7 +17,7 @@ const pastelColors = [
    { base: "#CC99C9", light: "#E6CCE4", dark: "#8F6B8D" },
 ];
 
-function JosDialog({
+function UseJosDialog({
    dialogOpened,
    setDialogOpened,
    jos,
@@ -140,4 +140,4 @@ function JosDialog({
    );
 }
 
-export default JosDialog;
+export default UseJosDialog;
