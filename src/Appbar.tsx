@@ -1,7 +1,8 @@
-import { AppBar, Button, Toolbar, Typography } from "@mui/material";
+import { GitHub } from "@mui/icons-material";
+import { AppBar, Button, IconButton, Toolbar, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
-function Appbar({ offline, loggedIn, username }: { offline: boolean; loggedIn: boolean; username: string }) {
+function Appbar({ offline, loggedIn, username }: { offline: boolean; loggedIn: boolean; username?: string }) {
    const navigate = useNavigate();
 
    function loggedInComponent() {
@@ -57,12 +58,15 @@ function Appbar({ offline, loggedIn, username }: { offline: boolean; loggedIn: b
             <Typography variant="h6" color="inherit" sx={{ mt: "10px", mr: "20px" }}>
                v{process.env.REACT_APP_VERSION}
             </Typography>
-            {/* <IconButton onClick={() => (window.location.href = "https://github.com/CraftinPark/jo")} sx={{ ml: 1 }}>
-          <GitHub sx={{ color: "white" }} />
-       </IconButton> */}
             <Typography variant="h6" color="inherit" component="div" sx={{ flexGrow: 1 }}>
                unbiased diversified team generator
             </Typography>
+            <IconButton
+               onClick={() => (window.location.href = "https://github.com/CraftinPark/jo")}
+               sx={{ ml: 1, mr: 2 }}
+            >
+               <GitHub sx={{ color: "white" }} />
+            </IconButton>
             {loggedInComponent()}
          </Toolbar>
       </AppBar>
