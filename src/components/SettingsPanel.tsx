@@ -57,10 +57,6 @@ const SettingsPanel = ({
             value={inclusionList}
             onChange={(e: any) => setInclusionList(e.target.value)}
          />
-         {/* <Typography display="inline" variant="subtitle2">
-            In order of importance (WIP)
-         </Typography>
-         <Switch disabled /> */}
          <Typography sx={{ mt: 1 }} variant="subtitle1">
             Exclusion List:
          </Typography>
@@ -72,11 +68,6 @@ const SettingsPanel = ({
             value={exclusionList}
             onChange={(e: any) => setExclusionList(e.target.value)}
          />
-         {/* <Typography display="inline" variant="subtitle2">
-            In order of importance (WIP)
-         </Typography>
-         <Switch disabled /> */}
-         <Divider light />
          <Button sx={{ mt: 1, mr: 1 }} variant="contained" onClick={() => createJos()}>
             Create New Jos
          </Button>

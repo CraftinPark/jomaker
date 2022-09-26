@@ -35,8 +35,6 @@ function App({ user }: { user: user }) {
          }),
       });
 
-      console.log("successfully sent post request ", user.username);
-
       localStorage.setItem(
          "user",
          JSON.stringify({
@@ -72,8 +70,6 @@ function App({ user }: { user: user }) {
       if (useAlgorithm) jos = createDiversifiedJos(numJos, activeMems, incList, excList);
       else jos = turntableAssign(numJos, shuffleMembers(activeMems));
       setJos(jos);
-
-      // post request inclusion lists
    }
 
    return (

@@ -1,4 +1,4 @@
-import { Button, Dialog, Grid, Paper, Typography } from "@mui/material";
+import { Button, ClickAwayListener, Dialog, Grid, Paper, Tooltip, Typography } from "@mui/material";
 import { CameraAlt, Download } from "@mui/icons-material";
 import { Box } from "@mui/system";
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
@@ -30,6 +30,7 @@ function JosDialog({
    const clipRef = useRef<HTMLImageElement>(null);
    const [image, takeScreenShot] = useScreenshot({ type: "image/jpeg", quality: 1.0 });
    const [randomPastelColors, setRandomPastelColors] = useState<any[]>([]);
+   const [clickedCopy, setClickedCopy] = useState<boolean>(false);
 
    const copyScreenshot = () => {
       getBlobFromImageElement(clipRef.current!).then((blob) => copyBlobToClipboard(blob));
@@ -119,15 +120,32 @@ function JosDialog({
             </Grid>
          </div>
          <div style={{ display: "flex", marginBottom: "20px" }}>
-            <Button
-               size="small"
-               variant="outlined"
-               style={{ marginRight: "5px" }}
-               onClick={copyScreenshot}
-               startIcon={<CameraAlt />}
-            >
-               Copy to Clipboard
-            </Button>
+            <ClickAwayListener onClickAway={() => setClickedCopy(false)}>
+               <Tooltip
+                  PopperProps={{
+                     disablePortal: true,
+                  }}
+                  open={clickedCopy}
+                  disableFocusListener
+                  disableHoverListener
+                  disableTouchListener
+                  title="Copied Image to Clipboard!"
+                  arrow
+               >
+                  <Button
+                     size="small"
+                     variant="outlined"
+                     style={{ marginRight: "5px" }}
+                     onClick={() => {
+                        copyScreenshot();
+                        setClickedCopy(true);
+                     }}
+                     startIcon={<CameraAlt />}
+                  >
+                     Copy Image to Clipboard
+                  </Button>
+               </Tooltip>
+            </ClickAwayListener>
             <Button size="small" variant="outlined" onClick={downloadScreenshot} startIcon={<Download />}>
                Download as .jpg
             </Button>
