@@ -4,6 +4,13 @@ All notable changes are documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 
+## [1.1.5]
+
+### Added:
+
+- Introduction of the USE functionality.
+- Capture screenshots directly to clipboard of pastel-colored Jos (ready for ppt or presentation).
+
 ## [1.1.4]
 
 ### Added:
