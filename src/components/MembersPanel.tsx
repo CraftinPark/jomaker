@@ -295,7 +295,7 @@ const MembersPanel = ({ members, setMembers }: MembersPanelProps) => {
                   </Box>
                   <Box sx={{ ...tableCell, backgroundColor: "gainsboro" }} width="5%">
                      <IconButton onClick={() => removeMember(index)}>
-                        <Delete sx={{color: "#d11a2a"}}/>
+                        <Delete sx={{ color: "#d11a2a" }} />
                      </IconButton>
                   </Box>
                </Box>
@@ -368,9 +368,31 @@ const MembersPanel = ({ members, setMembers }: MembersPanelProps) => {
       );
    }
 
+   function totalMembers(): number {
+      return (
+         members.length
+      );
+   }
+
+   function activeMembers(): number {
+      let activeTotal = 0
+
+      for (let member of members) {
+         if (member.active) {
+            activeTotal += 1
+         }
+      }
+      return (
+         activeTotal
+      );
+   }
+
    return (
       <Paper sx={{ p: 2, backgroundColor: "Gainsboro" }}>
-         <Typography variant="h6">Members:</Typography>
+         <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+            <Typography variant="h6">Members:</Typography>
+            <Typography variant="h6">Active/Total:{activeMembers()}/{totalMembers()}</Typography>
+         </Box>
          {renderMembers()}
          {newMemberForm()}
       </Paper>
