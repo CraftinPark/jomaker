@@ -81,7 +81,7 @@ export function calculateTotalScore(jos: member[][], inclusionList: string[][], 
    return sum;
 }
 
-function calculateJoScore(jo: member[], inclusionList: string[][], exclusionList: string[][]): number {
+export function calculateJoScore(jo: member[], inclusionList: string[][], exclusionList: string[][]): number {
    let score: number = 0;
    score += ageScore(jo);
    score += sexScore(jo);

@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import {
    Grid,
    Box,
@@ -12,14 +12,20 @@ import {
 } from "@mui/material";
 import { Person, ContentCopy } from "@mui/icons-material";
 import { Droppable, Draggable, DragDropContext } from "react-beautiful-dnd";
+import useMeasure from "react-use-measure";
+import { useSpring, animated } from "@react-spring/web";
 import { member } from "../util/types";
+import { calculateJoScore } from "../util/joMaker";
+import styles from "./styles.module.css";
 
 type JosPanelProps = {
    jos: member[][];
    setJos: Dispatch<SetStateAction<member[][]>>;
+   inclusionList: string[][];
+   exclusionList: string[][];
 };
 
-const JosPanel = ({ jos, setJos }: JosPanelProps) => {
+const JosPanel = ({ jos, setJos, inclusionList, exclusionList }: JosPanelProps) => {
    const [showProperties, setShowProperties] = useState<boolean>(false);
    const [useSecondaryNames, setUseSecondaryNames] = useState<boolean>(false);
    const [clickedCopyJos, setClickedCopyJos] = useState<boolean>(false);
@@ -81,18 +87,56 @@ const JosPanel = ({ jos, setJos }: JosPanelProps) => {
    }
 
    function joToClipboard(jo: member[]): void {
-      let joNames: string = jo.map((member) => (useSecondaryNames ? member.secondaryName : member.name) + " ").join("\n");
+      let joNames: string = jo
+         .map((member) => (useSecondaryNames ? member.secondaryName : member.name) + " ")
+         .join("\n");
       navigator.clipboard.writeText(joNames);
    }
 
    function RenderJo({ jo, index }: { jo: member[]; index: number }): JSX.Element {
       const [clickedCopyJo, setClickedCopyJos] = useState<boolean>(false);
+      const [diversityScore, setDiversityScore] = useState<number>(0);
+      const [ref, { width }] = useMeasure();
+      const scoreSpring = useSpring({ width: (width / 5) * diversityScore });
+
+      useEffect(() => {
+         setDiversityScore(calculateJoScore(jo, inclusionList, exclusionList));
+      }, [jo]);
 
       return (
          <Paper sx={{ m: 1, p: 1, backgroundColor: "lightblue" }}>
-            <Typography sx={{ color: "steelblue" }} variant="subtitle1">
-               Jo {index + 1}
-            </Typography>
+            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+               <Typography sx={{ color: "steelblue" }} variant="subtitle1">
+                  Jo {index + 1}
+               </Typography>
+               <div
+                  ref={ref}
+                  style={{
+                     position: "relative",
+                     width: "100px",
+                     height: "10px",
+                     borderRadius: "5px",
+                     backgroundColor: "grey",
+                     marginRight: "8px",
+                  }}
+               >
+                  <animated.div
+                     style={{
+                        ...scoreSpring,
+                        position: "absolute",
+                        top: "0",
+                        left: "0",
+                        height: "100%",
+                        borderRadius: "5px",
+                        background: "yellow",
+                     }}
+                  />
+                  <animated.div className={styles.content}>
+                     <Typography>{diversityScore}</Typography>
+                  </animated.div>
+               </div>
+            </Box>
+
             <Droppable droppableId={index.toString()}>
                {(provided, snapshot) => (
                   <div ref={provided.innerRef}>
@@ -192,7 +236,9 @@ const JosPanel = ({ jos, setJos }: JosPanelProps) => {
             </Grid>
             <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
                <FormControlLabel
-                  control={<Switch value={useSecondaryNames} onChange={(e: any) => setUseSecondaryNames(e.target.checked)} />}
+                  control={
+                     <Switch value={useSecondaryNames} onChange={(e: any) => setUseSecondaryNames(e.target.checked)} />
+                  }
                   label="Use Alternate Names"
                />
                <FormControlLabel

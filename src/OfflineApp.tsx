@@ -28,6 +28,8 @@ function OfflineApp() {
    const [exclusionList, setExclusionList] = useState<string>((): string => {
       return localStorage.getItem("exclusionList") ?? "";
    });
+   const [parsedInclusionList, setParsedInclusionList] = useState<string[][]>([]);
+   const [parsedExclusionList, setParsedExclusionList] = useState<string[][]>([]);
 
    const [dialogOpened, setDialogOpened] = useState<boolean>(false);
 
@@ -61,10 +63,10 @@ function OfflineApp() {
    function createJos(): void {
       const mems: member[] = [...members];
       const activeMems: member[] = mems.filter((mem: member) => mem.active);
-      const incList: string[][] = parseConditionList(inclusionList);
-      const excList: string[][] = parseConditionList(exclusionList);
+      setParsedInclusionList(parseConditionList(inclusionList));
+      setParsedExclusionList(parseConditionList(exclusionList));
       let jos: member[][] = [];
-      if (useAlgorithm) jos = createDiversifiedJos(numJos, activeMems, incList, excList);
+      if (useAlgorithm) jos = createDiversifiedJos(numJos, activeMems, parsedInclusionList, parsedExclusionList);
       else jos = turntableAssign(numJos, activeMems);
       setJos(jos);
    }
@@ -77,7 +79,12 @@ function OfflineApp() {
                <MembersPanel members={members} setMembers={setMembers} />
             </Grid>
             <Grid item xs={12} md={6}>
-               <JosPanel jos={jos} setJos={setJos}></JosPanel>
+               <JosPanel
+                  jos={jos}
+                  setJos={setJos}
+                  inclusionList={parsedInclusionList}
+                  exclusionList={parsedExclusionList}
+               ></JosPanel>
                <SettingsPanel
                   numJos={numJos}
                   setNumJos={setNumJos}
