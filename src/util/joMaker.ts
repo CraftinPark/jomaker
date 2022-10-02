@@ -102,7 +102,7 @@ function ageScore(jo: member[]): number {
          if (jo[i].year === jo[j].year) score++;
       }
    }
-   return score * 2;
+   return score;
 }
 
 function sexScore(jo: member[]): number {
@@ -114,7 +114,7 @@ function sexScore(jo: member[]): number {
       if (jo[i].sex === "male") numMale++;
       else if (jo[i].sex === "female") numFemale++;
    }
-   score = Math.abs(numMale - numFemale) ^ 2;
+   score = Math.pow(Math.abs(numMale - numFemale), 2);
    return score;
 }
 
@@ -124,7 +124,7 @@ function leaderScore(jo: member[]): number {
       if (jo[i].leader === true) numLeaders++;
    }
    if (numLeaders === 0) return 0;
-   else return (numLeaders - 1) * 5;
+   else return Math.pow(numLeaders, 2) + 1;
 }
 
 function inclusionScore(jo: member[], inclusionList: string[][]): number {
