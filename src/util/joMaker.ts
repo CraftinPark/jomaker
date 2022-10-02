@@ -1,5 +1,7 @@
 import { member } from "./types";
 
+// export function createDiversifiedJos(n: number, list: member[], inclusionList: string[][], exclusionList: string[][]) {}
+
 export function createDiversifiedJos(n: number, list: member[], inclusionList: string[][], exclusionList: string[][]) {
    let jos: member[][] = turntableAssign(n, shuffleMembers(list));
    for (let i = 0; i < jos.length; i++) {
@@ -69,11 +71,13 @@ export function shuffleMembers(members: member[]): member[] {
 // ############################################################################
 // SCORING SYSTEM
 // - age score: a point for each member with same year as another member in jo
-// - sex score: the difference in # of males to # of females in jo (unless only 1 member)
+// - sex score: the difference in # of males to # of females in jo squared (unless only 1 member)
 // - leader score: a point for each leader in a group (that is not the first leader)
 // - inclusion list: if member in inclusion list is not included in jo, 100 points
 // - exclusion list: if member is in the same jo as another member in exclusion list, 100 points
 // ############################################################################
+
+// Leader Score is unwilling to bend for sex disparity of 2, age commonality of 3 members with same age
 
 export function calculateTotalScore(jos: member[][], inclusionList: string[][], exclusionList: string[][]): number {
    let sum: number = 0;
@@ -98,7 +102,7 @@ function ageScore(jo: member[]): number {
          if (jo[i].year === jo[j].year) score++;
       }
    }
-   return score;
+   return score * 2;
 }
 
 function sexScore(jo: member[]): number {
@@ -110,7 +114,7 @@ function sexScore(jo: member[]): number {
       if (jo[i].sex === "male") numMale++;
       else if (jo[i].sex === "female") numFemale++;
    }
-   score = Math.abs(numMale - numFemale);
+   score = Math.abs(numMale - numFemale) ^ 2;
    return score;
 }
 
@@ -119,11 +123,8 @@ function leaderScore(jo: member[]): number {
    for (let i = 0; i < jo.length; i++) {
       if (jo[i].leader === true) numLeaders++;
    }
-   if (numLeaders === 0) return 1;
-   else {
-      let abs = Math.abs(numLeaders);
-      return (abs / 2) * (abs + 1) * (abs / numLeaders) - 1 || 0;
-   }
+   if (numLeaders === 0) return 0;
+   else return (numLeaders - 1) * 5;
 }
 
 function inclusionScore(jo: member[], inclusionList: string[][]): number {
