@@ -368,30 +368,20 @@ const MembersPanel = ({ members, setMembers }: MembersPanelProps) => {
       );
    }
 
-   function totalMembers(): number {
-      return (
-         members.length
-      );
-   }
-
    function activeMembers(): number {
-      let activeTotal = 0
+      let activeTotal: number = 0
 
       for (let member of members) {
-         if (member.active) {
-            activeTotal += 1
-         }
+         if (member.active) activeTotal++;
       }
-      return (
-         activeTotal
-      );
+      return activeTotal;
    }
 
    return (
       <Paper sx={{ p: 2, backgroundColor: "Gainsboro" }}>
          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
             <Typography variant="h6">Members:</Typography>
-            <Typography variant="h6">Active/Total:{activeMembers()}/{totalMembers()}</Typography>
+            <Typography variant="h6">{activeMembers()}/{members.length}</Typography>
          </Box>
          {renderMembers()}
          {newMemberForm()}
