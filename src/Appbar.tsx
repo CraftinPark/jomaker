@@ -1,9 +1,12 @@
 import { GitHub } from "@mui/icons-material";
-import { AppBar, Button, IconButton, Toolbar, Typography } from "@mui/material";
+import { AppBar, Button, Dialog, IconButton, Toolbar, Typography } from "@mui/material";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import ChangelogDialog from "./ChangelogDialog";
 
 function Appbar({ offline, loggedIn, username }: { offline: boolean; loggedIn: boolean; username?: string }) {
    const navigate = useNavigate();
+   const [dialogOpened, setDialogOpened] = useState<boolean>(false);
 
    function loggedInComponent() {
       if (offline) {
@@ -61,6 +64,10 @@ function Appbar({ offline, loggedIn, username }: { offline: boolean; loggedIn: b
             <Typography variant="h6" color="inherit" component="div" sx={{ flexGrow: 1 }}>
                unbiased diversified team generator
             </Typography>
+            <Button sx={{ mt: 1}} variant="text" color="inherit" onClick={() => setDialogOpened(true)}>
+               Changelogs
+            </Button>
+            <ChangelogDialog dialogOpened={dialogOpened} setDialogOpened={setDialogOpened} />
             <IconButton
                onClick={() => (window.location.href = "https://github.com/CraftinPark/jo")}
                sx={{ ml: 1, mr: 2 }}
