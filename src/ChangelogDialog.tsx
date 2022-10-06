@@ -1,19 +1,29 @@
-import { Dispatch, SetStateAction, useEffect } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Dialog, DialogContent } from "@mui/material";
-import Changelog from "./ChangeLog/Changelog.jsx";
+import ReactMarkdown from "react-markdown";
 
 function ChangelogDialog({
-    dialogOpened,
-    setDialogOpened,
- }: {
-    dialogOpened: boolean;
-    setDialogOpened: Dispatch<SetStateAction<boolean>>;
- }) {
+   dialogOpened,
+   setDialogOpened,
+}: {
+   dialogOpened: boolean;
+   setDialogOpened: Dispatch<SetStateAction<boolean>>;
+}) {
+   const [post, setPost] = useState<string>("");
+
    useEffect(() => {
+      const getPost = async () => {
+         // @ts-ignore
+         return import("./release-notes.md").then((res) => {
+            fetch(res.default)
+               .then((res) => res.text())
+               .then((text) => setPost(text));
+         });
+      };
+      getPost();
+   }, []);
 
-   }, [dialogOpened]);
-
-   return(
+   return (
       <Dialog
          fullWidth
          onClose={() => setDialogOpened(false)}
@@ -27,11 +37,10 @@ function ChangelogDialog({
          }}
       >
          <DialogContent>
-            {Changelog()}
+            <ReactMarkdown children={post}></ReactMarkdown>
          </DialogContent>
-
       </Dialog>
    );
 }
 
-export default ChangelogDialog
+export default ChangelogDialog;
