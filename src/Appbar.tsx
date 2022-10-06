@@ -64,8 +64,8 @@ function Appbar({ offline, loggedIn, username }: { offline: boolean; loggedIn: b
             <Typography variant="h6" color="inherit" component="div" sx={{ flexGrow: 1 }}>
                unbiased diversified team generator
             </Typography>
-            <Button sx={{ mt: 1 }} variant="text" color="inherit" onClick={() => setChangelogDialogOpened(true)}>
-               Changelogs
+            <Button variant="text" color="inherit" onClick={() => setChangelogDialogOpened(true)}>
+               Changelog
             </Button>
             <ChangelogDialog dialogOpened={changelogDialogOpened} setDialogOpened={setChangelogDialogOpened} />
             <IconButton
