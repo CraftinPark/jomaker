@@ -97,11 +97,21 @@ const JosPanel = ({ jos, setJos, inclusionList, exclusionList }: JosPanelProps) 
       const [clickedCopyJo, setClickedCopyJos] = useState<boolean>(false);
       const [diversityScore, setDiversityScore] = useState<number>(0);
       const [ref, { width }] = useMeasure();
-      const scoreSpring = useSpring({ width: (width / 5) * diversityScore });
+      const scoreSpring = useSpring({ width: (width / 100) * diversityScore });
 
       useEffect(() => {
-         setDiversityScore(calculateJoScore(jo, inclusionList, exclusionList));
+         setDiversityScore(Math.round(calculateJoScore(jo, inclusionList, exclusionList) * 10) / 10);
       }, [jo]);
+
+      function scoreColor() {
+         if (diversityScore < 15) {
+            return "#34c240";
+         } else if (diversityScore <= 40) {
+            return "#fa9f47";
+         } else if (diversityScore > 40) {
+            return "#d64242";
+         }
+      }
 
       return (
          <Paper sx={{ m: 1, p: 1, backgroundColor: "lightblue" }}>
@@ -109,31 +119,35 @@ const JosPanel = ({ jos, setJos, inclusionList, exclusionList }: JosPanelProps) 
                <Typography sx={{ color: "steelblue" }} variant="subtitle1">
                   Jo {index + 1}
                </Typography>
-               <div
-                  ref={ref}
-                  style={{
-                     position: "relative",
-                     width: "100px",
-                     height: "10px",
-                     borderRadius: "5px",
-                     backgroundColor: "grey",
-                     marginRight: "8px",
-                  }}
-               >
-                  <animated.div
+               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <Typography color="steelblue">Score:</Typography>
+                  <div
+                     ref={ref}
                      style={{
-                        ...scoreSpring,
-                        position: "absolute",
-                        top: "0",
-                        left: "0",
-                        height: "100%",
+                        position: "relative",
+                        width: "100px",
+                        height: "10px",
                         borderRadius: "5px",
-                        background: "yellow",
+                        backgroundColor: "grey",
+                        marginRight: "8px",
+                        marginLeft: "8px",
                      }}
-                  />
-                  <animated.div className={styles.content}>
-                     <Typography>{diversityScore}</Typography>
-                  </animated.div>
+                  >
+                     <animated.div
+                        style={{
+                           ...scoreSpring,
+                           position: "absolute",
+                           top: "0",
+                           left: "0",
+                           height: "100%",
+                           borderRadius: "5px",
+                           background: scoreColor(),
+                        }}
+                     />
+                     <animated.div className={styles.content}>
+                        <Typography color="white">{diversityScore}</Typography>
+                     </animated.div>
+                  </div>
                </div>
             </Box>
 
