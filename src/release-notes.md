@@ -4,6 +4,17 @@ All notable changes are documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 
+## [1.1.7]
+
+### Added:
+
+- Diversity Score bar to jos.
+- Active/Total member for attendance.
+
+### Changed:
+
+- Modified the algorithm to favor many small diversity punishments rather than one large one.
+
 ## [1.1.6]
 
 ### Changed:
