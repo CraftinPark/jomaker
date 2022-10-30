@@ -20,7 +20,7 @@ function App({ user }: { user: user }) {
    const [exclusionList, setExclusionList] = useState<string>(user.settings.exclusionList);
    const [parsedInclusionList, setParsedInclusionList] = useState<string[][]>([]);
    const [parsedExclusionList, setParsedExclusionList] = useState<string[][]>([]);
-   const [dialogOpened, setDialogOpened] = useState<boolean>(false);
+   const [useDialogOpened, setUseDialogOpened] = useState<boolean>(false);
 
    useEffect(() => {
       fetch("/api/jomaker/update-user", {
@@ -98,11 +98,11 @@ function App({ user }: { user: user }) {
                   exclusionList={exclusionList}
                   setExclusionList={setExclusionList}
                   createJos={createJos}
-                  setDialogOpened={setDialogOpened}
+                  setDialogOpened={setUseDialogOpened}
                />
             </Grid>
          </Grid>
-         <JosDialog dialogOpened={dialogOpened} setDialogOpened={setDialogOpened} jos={jos} />
+         <JosDialog dialogOpened={useDialogOpened} setDialogOpened={setUseDialogOpened} jos={jos} />
       </Box>
    );
 }
