@@ -104,11 +104,11 @@ const JosPanel = ({ jos, setJos, inclusionList, exclusionList }: JosPanelProps) 
       }, [jo]);
 
       function scoreColor() {
-         if (diversityScore < 15) {
+         if (diversityScore < 33) {
             return "#34c240";
-         } else if (diversityScore <= 40) {
+         } else if (diversityScore <= 60) {
             return "#fa9f47";
-         } else if (diversityScore > 40) {
+         } else if (diversityScore > 60) {
             return "#d64242";
          }
       }

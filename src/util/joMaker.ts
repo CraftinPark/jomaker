@@ -91,6 +91,8 @@ export function calculateJoScore(jo: member[], inclusionList: string[][], exclus
 
    score /= Math.pow(jo.length, 2) * 3;
    score *= 100;
+   score = Math.sqrt(score);
+   score *= 10;
 
    return score;
 }
