@@ -18,6 +18,8 @@ function App({ user }: { user: user }) {
    const [useAlgorithm, setUseAlgorithm] = useState<boolean>(true);
    const [inclusionList, setInclusionList] = useState<string>(user.settings.inclusionList);
    const [exclusionList, setExclusionList] = useState<string>(user.settings.exclusionList);
+   const [parsedInclusionList, setParsedInclusionList] = useState<string[][]>([]);
+   const [parsedExclusionList, setParsedExclusionList] = useState<string[][]>([]);
    const [useDialogOpened, setUseDialogOpened] = useState<boolean>(false);
 
    useEffect(() => {
@@ -64,10 +66,10 @@ function App({ user }: { user: user }) {
    function createJos(): void {
       const mems: member[] = [...members];
       const activeMems: member[] = mems.filter((mem: member) => mem.active);
-      const incList: string[][] = parseConditionList(inclusionList);
-      const excList: string[][] = parseConditionList(exclusionList);
+      setParsedInclusionList(parseConditionList(inclusionList));
+      setParsedExclusionList(parseConditionList(exclusionList));
       let jos: member[][] = [];
-      if (useAlgorithm) jos = createDiversifiedJos(numJos, activeMems, incList, excList);
+      if (useAlgorithm) jos = createDiversifiedJos(numJos, activeMems, parsedInclusionList, parsedExclusionList);
       else jos = turntableAssign(numJos, shuffleMembers(activeMems));
       setJos(jos);
    }
@@ -80,7 +82,12 @@ function App({ user }: { user: user }) {
                <MembersPanel members={members} setMembers={setMembers} />
             </Grid>
             <Grid item xs={12} md={6}>
-               <JosPanel jos={jos} setJos={setJos}></JosPanel>
+               <JosPanel
+                  jos={jos}
+                  setJos={setJos}
+                  inclusionList={parsedInclusionList}
+                  exclusionList={parsedExclusionList}
+               ></JosPanel>
                <SettingsPanel
                   numJos={numJos}
                   setNumJos={setNumJos}
@@ -95,7 +102,7 @@ function App({ user }: { user: user }) {
                />
             </Grid>
          </Grid>
-         <JosDialog dialogOpened={useDialogOpened} setDialogOpened={setUseDialogOpened} jos={jos}/>
+         <JosDialog dialogOpened={useDialogOpened} setDialogOpened={setUseDialogOpened} jos={jos} />
       </Box>
    );
 }

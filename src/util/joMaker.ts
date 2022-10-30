@@ -77,27 +77,38 @@ export function shuffleMembers(members: member[]): member[] {
 
 export function calculateTotalScore(jos: member[][], inclusionList: string[][], exclusionList: string[][]): number {
    let sum: number = 0;
-   for (let i = 0; i < jos.length; i++) sum += calculateJoScore(jos[i], inclusionList, exclusionList);
+   for (let i = 0; i < jos.length; i++) sum += Math.pow(calculateJoScore(jos[i], inclusionList, exclusionList), 2);
    return sum;
 }
 
-function calculateJoScore(jo: member[], inclusionList: string[][], exclusionList: string[][]): number {
+export function calculateJoScore(jo: member[], inclusionList: string[][], exclusionList: string[][]): number {
    let score: number = 0;
    score += ageScore(jo);
    score += sexScore(jo);
    score += leaderScore(jo);
    score += inclusionScore(jo, inclusionList);
    score += exclusionScore(jo, exclusionList);
+
+   score /= Math.pow(jo.length, 2) * 3;
+   score *= 100;
+   score = Math.sqrt(score);
+   score *= 10;
+
    return score;
 }
 
 function ageScore(jo: member[]): number {
+   // find all unique years.
+   let uniqueYears: any[] = [];
    let score: number = 0;
-   for (let i = 0; i < jo.length - 1; i++) {
-      for (let j = i + 1; j < jo.length; j++) {
-         if (jo[i].year === jo[j].year) score++;
-      }
+
+   for (let i = 0; i < jo.length; i++) {
+      if (!uniqueYears.some((year) => year.year === jo[i].year)) uniqueYears.push({ year: jo[i].year, count: 0 });
+      else uniqueYears.find((year) => year.year === jo[i].year).count++;
    }
+
+   uniqueYears.forEach((year) => (score += Math.pow(year.count, 2)));
+
    return score;
 }
 
@@ -110,7 +121,7 @@ function sexScore(jo: member[]): number {
       if (jo[i].sex === "male") numMale++;
       else if (jo[i].sex === "female") numFemale++;
    }
-   score = Math.abs(numMale - numFemale);
+   score = Math.pow(Math.abs(numMale - numFemale), 2);
    return score;
 }
 
@@ -119,10 +130,9 @@ function leaderScore(jo: member[]): number {
    for (let i = 0; i < jo.length; i++) {
       if (jo[i].leader === true) numLeaders++;
    }
-   if (numLeaders === 0) return 1;
+   if (numLeaders === 0) return Math.pow(jo.length, 2);
    else {
-      let abs = Math.abs(numLeaders);
-      return (abs / 2) * (abs + 1) * (abs / numLeaders) - 1 || 0;
+      return Math.pow(numLeaders, 2);
    }
 }
 
