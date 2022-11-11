@@ -9,6 +9,7 @@ import {
    Tooltip,
    FormControlLabel,
    Switch,
+   Button,
 } from "@mui/material";
 import { Person, ContentCopy } from "@mui/icons-material";
 import { Droppable, Draggable, DragDropContext } from "react-beautiful-dnd";
@@ -85,6 +86,17 @@ const JosPanel = ({ jos, setJos }: JosPanelProps) => {
       navigator.clipboard.writeText(joNames);
    }
 
+   function handleAdd(index: number): void {
+      const newJo = jos[index].concat(jos[index][0]);
+      setJos((prev) => {
+         const jos = [...prev]
+         jos[index] = newJo
+
+         return jos
+      });
+      console.log(newJo)
+   }
+
    function RenderJo({ jo, index }: { jo: member[]; index: number }): JSX.Element {
       const [clickedCopyJo, setClickedCopyJos] = useState<boolean>(false);
 
@@ -102,6 +114,14 @@ const JosPanel = ({ jos, setJos }: JosPanelProps) => {
                )}
             </Droppable>
             <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+               <Button sx={{
+                  backgroundColor: "red",
+                  color: "red",
+                  width: "1px",
+                  height: "30px"
+               }}
+                  onClick={() => handleAdd(index)}>
+               </Button>
                <ClickAwayListener onClickAway={() => setClickedCopyJos(false)}>
                   <Tooltip
                      PopperProps={{
