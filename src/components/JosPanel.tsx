@@ -10,8 +10,10 @@ import {
    FormControlLabel,
    Switch,
    Button,
+   TextField,
 } from "@mui/material";
-import { Person, ContentCopy } from "@mui/icons-material";
+import { v4 as uuidv4 } from "uuid";
+import { Person, ContentCopy, Delete } from "@mui/icons-material";
 import { Droppable, Draggable, DragDropContext } from "react-beautiful-dnd";
 import { member } from "../util/types";
 
@@ -24,6 +26,7 @@ const JosPanel = ({ jos, setJos }: JosPanelProps) => {
    const [showProperties, setShowProperties] = useState<boolean>(false);
    const [useSecondaryNames, setUseSecondaryNames] = useState<boolean>(false);
    const [clickedCopyJos, setClickedCopyJos] = useState<boolean>(false);
+   const [tempName, setTempName] = useState(new Map<number, String | undefined>());
 
    // react-beautiful-dnd functions: reorder, move, onDragEnd
 
@@ -51,7 +54,7 @@ const JosPanel = ({ jos, setJos }: JosPanelProps) => {
    };
 
    const onDragEnd = (result: any): void => {
-      const { source, destination } = result;
+      const { source, destination, draggableId } = result;
       if (!destination) return;
       if (source.droppableId === destination.droppableId) {
          setJos((prev) => {
@@ -63,7 +66,20 @@ const JosPanel = ({ jos, setJos }: JosPanelProps) => {
             );
             return jos;
          });
-      } else {
+      } 
+      else if (destination.droppableId === "garbage") {
+         setJos((prev) => {
+            const jos = [...prev];
+            const currentJo = jos[parseInt(source.droppableId)]
+            for(let i = 0; i < currentJo.length; i++){
+               if(currentJo[i].id === draggableId){
+                  jos[parseInt(source.droppableId)].splice(i, 1)
+               }
+            }
+            return jos
+         })
+      }
+      else {
          const result: member[][] = move(
             jos[parseInt(source.droppableId)],
             jos[parseInt(destination.droppableId)],
@@ -86,15 +102,16 @@ const JosPanel = ({ jos, setJos }: JosPanelProps) => {
       navigator.clipboard.writeText(joNames);
    }
 
-   function handleAdd(index: number): void {
-      const newJo = jos[index].concat(jos[index][0]);
+   function handleAdd(index: number, newMember: member): void {
+      const newJo = jos[index].concat(newMember);
       setJos((prev) => {
          const jos = [...prev]
          jos[index] = newJo
 
          return jos
       });
-      console.log(newJo)
+
+      tempName.set(index, undefined)
    }
 
    function RenderJo({ jo, index }: { jo: member[]; index: number }): JSX.Element {
@@ -113,14 +130,32 @@ const JosPanel = ({ jos, setJos }: JosPanelProps) => {
                   </div>
                )}
             </Droppable>
-            <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+            <Box sx={{ display: "flex", justifyContent: "flex-end", alignItems: "center"}}>
+               <TextField
+                  required
+                  placeholder="Name"
+                  size="small"
+                  value={tempName.get(index)}
+                  sx = {{
+                     width: "100px",
+                     margin: "0px 5px"
+                  }}
+                  onChange={(e: any) => setTempName((prev) => {
+                     const tempNameList = prev
+                     tempNameList.set(index, e.target.value)
+                     return tempNameList
+                  })}
+               />
                <Button sx={{
-                  backgroundColor: "red",
-                  color: "red",
-                  width: "1px",
-                  height: "30px"
+                  backgroundColor: "green",
+                  color: "white",
+                  height: "25px",
                }}
-                  onClick={() => handleAdd(index)}>
+                  onClick={() => {
+                     if (tempName.get(index) === undefined) return;
+                     handleAdd(index, { id: uuidv4(), name: String(tempName.get(index)), secondaryName: "N/A", sex: "male", year: 0, leader: false, active: false })
+                     }}>
+                  Add
                </Button>
                <ClickAwayListener onClickAway={() => setClickedCopyJos(false)}>
                   <Tooltip
@@ -210,7 +245,19 @@ const JosPanel = ({ jos, setJos }: JosPanelProps) => {
                   </Grid>
                ))}
             </Grid>
-            <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+
+            <Box sx={{ display: "flex", justifyContent: "flex-end", alignItems: "center"}}>
+               <Delete sx={{ color: "#d11a2a", fontSize: "3em"}} />
+               <Paper sx={{margin: "0px 15px 10px", width: "210px", height: "50px", borderStyle: "solid", borderColor: "red"}}>
+                  <Droppable droppableId={"garbage"} >
+                     {(provided) => (
+                        <div ref={provided.innerRef}>
+                           
+                           {provided.placeholder}
+                        </div>
+                     )}
+                  </Droppable>
+               </Paper>
                <FormControlLabel
                   control={<Switch value={useSecondaryNames} onChange={(e: any) => setUseSecondaryNames(e.target.checked)} />}
                   label="Use Alternate Names"
