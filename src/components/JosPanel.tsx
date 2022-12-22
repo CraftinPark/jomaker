@@ -66,13 +66,13 @@ const JosPanel = ({ jos, setJos }: JosPanelProps) => {
             );
             return jos;
          });
-      } 
+      }
       else if (destination.droppableId === "garbage") {
          setJos((prev) => {
             const jos = [...prev];
             const currentJo = jos[parseInt(source.droppableId)]
-            for(let i = 0; i < currentJo.length; i++){
-               if(currentJo[i].id === draggableId){
+            for (let i = 0; i < currentJo.length; i++) {
+               if (currentJo[i].id === draggableId) {
                   jos[parseInt(source.droppableId)].splice(i, 1)
                }
             }
@@ -130,13 +130,13 @@ const JosPanel = ({ jos, setJos }: JosPanelProps) => {
                   </div>
                )}
             </Droppable>
-            <Box sx={{ display: "flex", justifyContent: "flex-end", alignItems: "center"}}>
+            <Box sx={{ display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
                <TextField
                   required
                   placeholder="Name"
                   size="small"
                   value={tempName.get(index)}
-                  sx = {{
+                  sx={{
                      width: "100px",
                      margin: "0px 5px"
                   }}
@@ -154,7 +154,7 @@ const JosPanel = ({ jos, setJos }: JosPanelProps) => {
                   onClick={() => {
                      if (tempName.get(index) === undefined) return;
                      handleAdd(index, { id: uuidv4(), name: String(tempName.get(index)), secondaryName: "N/A", sex: "male", year: 0, leader: false, active: false })
-                     }}>
+                  }}>
                   Add
                </Button>
                <ClickAwayListener onClickAway={() => setClickedCopyJos(false)}>
@@ -246,13 +246,22 @@ const JosPanel = ({ jos, setJos }: JosPanelProps) => {
                ))}
             </Grid>
 
-            <Box sx={{ display: "flex", justifyContent: "flex-end", alignItems: "center"}}>
-               <Delete sx={{ color: "#d11a2a", fontSize: "3em"}} />
-               <Paper sx={{margin: "0px 15px 10px", width: "210px", height: "50px", borderStyle: "solid", borderColor: "red"}}>
+            <Box sx={{ display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
+               <Paper sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  margin: "0px 15px 10px",
+                  width: "250px",
+                  height: "50px",
+                  borderStyle: "solid",
+                  borderColor: "red",
+                  backgroundColor: "salmon"
+               }}>
+                  <Delete sx={{ color: "#d11a2a", fontSize: "3em" }} />
                   <Droppable droppableId={"garbage"} >
                      {(provided) => (
                         <div ref={provided.innerRef}>
-                           
+
                            {provided.placeholder}
                         </div>
                      )}
